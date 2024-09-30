@@ -24,7 +24,7 @@
 
 ### To run on docker host:
 
-[Instruction](https://hub.docker.com/r/eaeoz/ssh-shortcut-windows)
+[Instruction](https://hub.docker.com/r/eaeoz/command-manager-docker)
 
 ---
 
