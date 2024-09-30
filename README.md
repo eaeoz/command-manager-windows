@@ -35,7 +35,7 @@
 ]
 ```
 
-##### Run Application At The Path Below
+##### Run Application At The Path Below ( automatically Installation will be add start and desktop shortcuts )
 
 - `C:\Users\%USERNAME%\AppData\Local\CommandManager\command-manager.exe`
 
