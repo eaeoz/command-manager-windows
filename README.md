@@ -8,7 +8,7 @@
 
 - Display: default 1280x720 change proper value for your screen
 - Timeout: default 10 seconds, you can adjust type of command your are waiting as response time
-- You don't need to change file names cuz its already provided and created for you.
+- (You can keep same profiles.json and commands.json config file names)
 
 - `C:\Users\%USERNAME%\AppData\Local\CommandManager\resources\app\config\.env`
 
