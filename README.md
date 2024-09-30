@@ -24,6 +24,8 @@
 
 [Instruction](https://hub.docker.com/r/eaeoz/command-manager-docker)
 
+[Github Repo for Docker](https://github.com/eaeoz/command-manager-docker)
+
 ---
 
 ### (optional) You can run and test npm package as well
