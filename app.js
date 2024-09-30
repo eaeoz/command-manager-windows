@@ -200,8 +200,8 @@ expressApp.get('/', (req, res) => {
     }
 
     .gear-icon:hover {
-        scale: 1.05;
-        transition: scale 0.3s ease-out;
+        opacity: 0.5;
+        transition: opacity 0.1s ease-in-out;
     }
 
     .gear-icon:active {
