@@ -146,6 +146,11 @@ expressApp.get('/', (req, res) => {
         background-color: #45a049;
     }
 
+    .command-title-button:active {
+        transform: scale(0.85) translateY(2px);
+        transition: transform 0.1s ease-in-out;
+    }
+
     .command-actions {
         display: none; /* Hidden initially */
         height: 50%;
@@ -187,6 +192,20 @@ expressApp.get('/', (req, res) => {
         cursor: pointer;
         padding-bottom: 5px;
         padding-top: 5px;
+    }
+
+    .url-icon:hover {
+        translate: 0 6px;
+        transition: translate 0.2s ease-in-out;
+    }
+
+    .gear-icon:hover {
+        scale: 1.05;
+        transition: scale 0.3s ease-out;
+    }
+
+    .gear-icon:active {
+        translate: 0 2px;
     }
 
     .gear-icon img, .url-icon img {
