@@ -1,0 +1,37 @@
+{
+  "name": "command-manager",
+  "version": "1.0.0",
+  "main": "app.js",
+  "bin": "app.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . command-manager --platform=win32 --arch=x64 --out=dist --overwrite  --prune=true --icon=favicon.ico"
+  },
+  "pkg": {
+    "targets": [
+      "node18-win-x64"
+    ],
+    "assets": [
+      "error.log",
+      "commands.json",
+      "profiles.json",
+      "data/**/*"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "dotenv": "^16.4.5",
+    "electron-log": "^5.2.0",
+    "express": "^4.21.0",
+    "fs": "^0.0.1-security",
+    "ssh2": "^1.16.0"
+  },
+  "devDependencies": {
+    "electron": "^32.1.2",
+    "electron-packager": "^17.1.2"
+  },
+  "description": ""
+}
