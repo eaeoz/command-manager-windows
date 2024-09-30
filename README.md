@@ -12,7 +12,7 @@
 
 ##### Edit your ssh host profiles using this file:
 
-- `C:\Users\%USERNAME%\AppData\Local\CommandManager\resources\app\config\profiles.json
+- `C:\Users\%USERNAME%\AppData\Local\CommandManager\resources\app\config\profiles.json`
 
 ##### Run Application At The Path Below
 
