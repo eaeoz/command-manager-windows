@@ -14,7 +14,7 @@
 
 - `C:\Users\%USERNAME%\AppData\Local\CommandManager\resources\app\config\profiles.json`
 
-##### config/profiles.json example ( you have to edit manually with sudo permissions using correct values for your servers )
+##### config/profiles.json example ( you have to edit manually using correct values for your servers )
 
 ```
 [
