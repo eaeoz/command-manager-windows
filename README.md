@@ -35,10 +35,6 @@
 ]
 ```
 
-##### Run Application At The Path Below ( Installation will be automatically create start and desktop shortcuts )
-
-- `C:\Users\%USERNAME%\AppData\Local\CommandManager\command-manager.exe`
-
 ---
 
 ### To run on docker host:
