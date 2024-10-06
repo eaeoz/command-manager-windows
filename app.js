@@ -710,6 +710,7 @@ border-top: none;
                             alert('Profile added successfully!');
                             loadProfilesList(); // Refresh the profile list
                             document.getElementById('addProfileForm').reset(); // Reset the form
+                            window.location.reload();
                         } else {
                             alert('Failed to add profile.');
                         }
@@ -875,6 +876,7 @@ border-top: none;
                     .then(data => {
                         alert(\`Profile "\${title}" deleted successfully.\`);
                         loadProfilesList(); // Refresh the list in the modal
+                        location.reload();
                     })
                     .catch(error => {
                         alert(error.message); // Show the error
@@ -1028,8 +1030,6 @@ border-top: none;
                                 });
                             });
                 
-                
-                            
                 
                             function runCommand(command, profileTitle) {
                                 // Fetch the profiles to check if the selected profile exists
