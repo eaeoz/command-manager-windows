@@ -937,6 +937,76 @@ expressApp.post('/reorder', (req, res) => {
     res.sendStatus(200);
 });
 
+// API endpoints for profiles
+expressApp.get('/profiles', (req, res) => {
+    try {
+        const profiles = loadProfiles(); // Load profiles from the file
+        res.json(profiles); // Send the profiles as a JSON response
+    } catch (error) {
+        console.error('Error loading profiles:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Get single profile
+expressApp.get('/profiles/:index', (req, res) => {
+    const profiles = loadProfiles();
+    const index = parseInt(req.params.index);
+    if (profiles[index]) {
+        res.json(profiles[index]);
+    } else {
+        res.status(404).json({ error: 'Profile not found' });
+    }
+});
+
+// Route to add a new profile
+expressApp.post('/profiles', (req, res) => {
+    const profiles = loadProfiles();
+    profiles.push(req.body);
+    saveProfiles(profiles);
+    res.json({ success: true });
+});
+
+// Edit single profile
+expressApp.put('/profiles/:index', (req, res) => {
+    const profiles = loadProfiles();
+    const index = parseInt(req.params.index);
+    const oldTitle = profiles[index].title; // Store the old title
+
+    if (profiles[index]) {
+        profiles[index] = req.body;
+        saveProfiles(profiles);
+
+        // Check if the title has changed
+        if (oldTitle !== req.body.title) {
+            updateCommandsForProfileChange(oldTitle, req.body.title); // Update commands
+        }
+
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ error: 'Profile not found' });
+    }
+});
+
+expressApp.delete('/profiles/:title', (req, res) => {
+    const profiles = loadProfiles();
+    const title = req.params.title;
+
+    console.log(`Trying to delete profile: ${title}`); // Log the title being deleted
+
+    const index = profiles.findIndex(profile => profile.title === title);
+
+    if (index !== -1) {
+        profiles.splice(index, 1); // Remove the profile
+        saveProfiles(profiles); // Save updated profiles
+        console.log('Profile deleted successfully'); // Log success
+        return res.json({ success: true });
+    } else {
+        console.error('Profile not found'); // Log not found
+        return res.status(404).json({ error: 'Profile not found' });
+    }
+});
+
 expressApp.post('/commands', (req, res) => {
     const { title, command, url, profile } = req.body;
 
@@ -996,7 +1066,6 @@ expressApp.post('/edit', (req, res) => {
         }
     });
 });
-
 
 expressApp.post('/delete', (req, res) => {
     let commands = loadCommands();
@@ -1094,6 +1163,17 @@ ipcMain.on('show-alert', (event, message) => {
         type: 'info',
         message: message
     });
+});
+
+ipcMain.on('show-confirmation', (event, message) => {
+    const response = dialog.showMessageBoxSync({
+        type: 'warning',
+        buttons: ['Cancel', 'OK'],
+        title: 'Confirmation',
+        message: message,
+    });
+    // Send the response back to the renderer process
+    event.reply('confirmation-response', response === 1); // 1 means OK was clicked
 });
 
 // Quit when all windows are closed
