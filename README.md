@@ -10,33 +10,6 @@
 
 - `C:\Users\%USERNAME%\AppData\Local\CommandManager\resources\app\config\.env`
 
-##### Edit your ssh host profiles using this file:
-
-- `C:\Users\%USERNAME%\AppData\Local\CommandManager\resources\app\config\profiles.json`
-
-##### config/profiles.json example ( you have to edit manually using correct values for your servers )
-
-```
-[
-    {
-        "title": "Profile 1",
-        "username": "user1",
-        "password": "password1",
-        "host": "192.168.10.1",
-        "port": 22
-    },
-    {
-        "title": "Profile 2",
-        "username": "user2",
-        "password": "password2",
-        "host": "192.168.10.2",
-        "port": 22
-    }
-]
-```
-
----
-
 ### To run on docker host:
 
 [Instruction](https://hub.docker.com/r/eaeoz/command-manager-docker)
