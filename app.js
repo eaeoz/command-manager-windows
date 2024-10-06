@@ -98,12 +98,174 @@ expressApp.get('/', (req, res) => {
         text-align: center;
     }
 
+    /* Styling the quarter-circle button */
+    .quarter-circle-button {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 80px;
+        height: 80px;
+        background-color: #333;
+        border-radius: 0 0 0 80px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    /* Hamburger icon */
+    .hamburger-icon {
+        width: 30px;
+        height: 3px;
+        background-color: white;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        left: 6px;
+        bottom: 6px;
+    }
+
+    .hamburger-icon::before,
+    .hamburger-icon::after {
+        content: "";
+        width: 30px;
+        height: 3px;
+        background-color: white;
+        position: absolute;
+    }
+
+    .hamburger-icon::before {
+        top: -10px;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .hamburger-icon::after {
+        bottom: -10px;
+        border-radius: 0 0 10px 10px;
+    }
+
+    /* Profile Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1001;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-content {
+        background-color: #f4f4f4;
+        margin: 10% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 33%;
+        max-width: 600px;
+        border-radius: 10px;
+        max-height: 80vh;
+        overflow-y: auto; 
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .profile-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .profile-list-container {
+        max-height: 400px; /* Set the desired maximum height of the profile list */
+        overflow-y: auto; /* Add vertical scrollbar if the list exceeds the height */
+    }
+
+    .profile-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        background-color: #ddd;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        background-color: #f1f1f1;
+    }
+
+    .profile-item button {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 3px;
+        width: 100px;
+    }
+
+    .profile-item button:hover {
+        background-color: #d32f2f;
+    }
+
+    .profile-item button:active {
+        transform: scale(0.95);
+    }
+
+    .profile-item button.edit-profile {
+        background-color: #2196F3;
+        
+    }
+
+    .add-profile-form {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .add-profile-form input {
+        padding: 10px;
+        width: 100%;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    .add-profile-form button {
+        padding: 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    .add-profile-form button:hover {
+        background-color: #45a049;
+    }
+
     .command-container {
         flex: 1;
-        display: flex;
-        flex-wrap: wrap;
+        display: flex; 
         justify-content: center;
-        gap: 10px;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        flex-direction: row;   
+        gap: 15px;
         overflow-y: auto; /* Allow scrolling for overflow */
         padding: 1px
     }
@@ -181,6 +343,38 @@ expressApp.get('/', (req, res) => {
     .command-actions button:hover {
         opacity: 0.8;
     }
+
+    /* Tabs */
+.tab {
+overflow: hidden;
+border-bottom: 1px solid #ccc;
+margin-bottom: 20px;
+}
+
+.tab button {
+background-color: inherit;
+border: none;
+outline: none;
+cursor: pointer;
+padding: 14px 16px;
+transition: 0.3s;
+font-size: 17px;
+}
+
+.tab button:hover {
+background-color: #ddd;
+}
+
+.tab button.active {
+background-color: #ccc;
+}
+
+.tabcontent {
+display: none;
+padding: 6px 12px;
+border-top: none;
+}
+
 
     .gear-icon, .url-icon {
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.6);
@@ -300,10 +494,21 @@ expressApp.get('/', (req, res) => {
         border-radius: 50px 50px;
     }
     .edit {
+        padding-left: 12px;
+        padding-bottom: 5px;
         border-bottom-left-radius: 50px;
+        border-top-left-radius: 7px;
     }
     .delete {
+        padding-right: 12px;
+        padding-bottom: 5px;
         border-bottom-right-radius: 50px;
+        border-top-right-radius: 7px;
+    }
+
+    .edit:active, .delete:active {
+        scale: 0.9;
+        translate: 0 2px;
     }
     .submitButton {
         border-bottom-left-radius: 50px;
@@ -324,7 +529,7 @@ expressApp.get('/', (req, res) => {
         width: 100%;
         transition: all 0.3s ease-in-out;
     }
-      
+
     .nav .container {
         width: 98%;
         display: flex;
@@ -352,61 +557,109 @@ expressApp.get('/', (req, res) => {
         justify-content: center;
     }
 </style>
-
-<div class="nav">
-<div class="container">
-    <h1>Command Manager</h1>
-    <div id="output"></div>
-    <div class="loading-text">0%</div>
-</div>
-</div>
-
-<div class="command-container" id="draggable-command-list">
-${commands.map(cmd => `
-    <div class="command-card" data-line-number="${cmd.lineNumber}">
-    ${cmd.url ? `
-    <div class="url-icon" id="url-${cmd.title}" onclick="openExternalURL('${cmd.url}')">
-        <img src="/data/url.png" alt="Link Icon">
+<div id="profileModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeProfileModal">&times;</span>
+            <h2>Manage Profiles</h2>
+            
+            <!-- Tabs -->
+            <div class="tab">
+                <button class="tablinks" onclick="openTab(event, 'AddProfile')">Add Profile</button>
+                <button class="tablinks" onclick="openTab(event, 'EditProfile')">Edit Profile</button>
+            </div>
+    
+            <!-- Tab content -->
+            <div id="AddProfile" class="tabcontent">
+                <form class="add-profile-form" id="addProfileForm">
+                    <h3>Add New Profile</h3>
+                    <input type="text" id="newProfileTitle" placeholder="Profile Title" required />
+                    <input type="text" id="newProfileUsername" placeholder="Username" required />
+                    <input type="password" id="newProfilePassword" placeholder="Password" required />
+                    <input type="text" id="newProfileHost" placeholder="Host" required />
+                    <input type="number" id="newProfilePort" placeholder="Port" value="22" required />
+                    <button type="submit">Add Profile</button>
+                </form>
+            </div>
+    
+            <div id="EditProfile" class="tabcontent" style="display:none;">
+            <h3>Edit Profile</h3>
+            <form class="edit-profile-form" id="editProfileForm" style="display:none;">
+                <input type="text" id="editProfileTitle" placeholder="Profile Title" required />
+                <input type="text" id="editProfileUsername" placeholder="Username" required />
+                <input type="password" id="editProfilePassword" placeholder="Password" required />
+                <input type="text" id="editProfileHost" placeholder="Host" required />
+                <input type="number" id="editProfilePort" placeholder="Port" value="22" required />
+                <button type="submit">Update Profile</button>
+            </form>
+                <div class="profile-list-container">
+                    <div class="profile-list">
+                        <!-- Profiles will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    ` : ''}
-        <button class="command-title-button" id="title-${cmd.title}" onclick="runCommand('${cmd.command}', '${cmd.profile}')">
-            ${cmd.title}
-        </button>
-        <div class="gear-icon" onclick="toggleActions('${cmd.title}')">
-            <img src="/data/gear.png" alt="Gear Icon">
+    
+        <!-- Quarter-circle button -->
+        <div class="quarter-circle-button" id="openFormButton">
+            <div class="hamburger-icon"></div>
         </div>
-        <div class="command-actions" id="actions-${cmd.title}">
-            <button class="edit" id="edit-${cmd.title}" onclick="toggleEditForm('${cmd.title}', '${cmd.command}')">Edit</button>
-            <button class="delete" id="delete-${cmd.title}" onclick="deleteCommand('${cmd.title}')">Delete</button>
+        <div class="nav">
+        <div class="container">
+            <h1>Command Manager</h1>
+            <div id="output"></div>
+            <div class="loading-text">0%</div>
         </div>
-        <form class="edit-form" id="editForm-${cmd.title}" onsubmit="submitEditForm(event, '${cmd.title}')">
-        <input type="text" id="editTitle-${cmd.title}" value="${cmd.title}" placeholder="Edit Title" required />
-        <input type="text" id="editCommand-${cmd.title}" value="${cmd.command}" placeholder="Edit Command" required />
-        <input type="text" id="editUrl-${cmd.title}" value="${cmd.url || ''}" placeholder="Edit URL" />
-        <select id="editProfile-${cmd.title}" required>
-            ${profiles.map(profile => `
-                <option value="${profile.title}" ${profile.title === cmd.profile ? 'selected' : ''}>${profile.title}</option>
+        </div>
+
+
+        <div class="command-container" id="draggable-command-list">
+            ${commands.map(cmd => `
+                <div class="command-card" data-line-number="${cmd.lineNumber}">
+                ${cmd.url ? `
+                <div class="url-icon" id="url-${cmd.title}" onclick="window.open('${cmd.url}', '_blank')">
+                    <img src="/data/url.png" alt="Link Icon">
+                </div>
+                ` : ''}
+                    <button class="command-title-button" id="title-${cmd.title}" onclick="runCommand('${cmd.command}', '${cmd.profile}')">
+                        ${cmd.title}
+                    </button>
+                    <div class="gear-icon" onclick="toggleActions('${cmd.title}')">
+                        <img src="/data/gear.png" alt="Gear Icon">
+                    </div>
+                    <div class="command-actions" id="actions-${cmd.title}">
+                        <button class="edit" id="edit-${cmd.title}" onclick="toggleEditForm('${cmd.title}', '${cmd.command}')">Edit</button>
+                        <button class="delete" id="delete-${cmd.title}" onclick="deleteCommand('${cmd.title}')">Delete</button>
+                    </div>
+                    <form class="edit-form" id="editForm-${cmd.title}" onsubmit="submitEditForm(event, '${cmd.title}')">
+                    <input type="text" id="editTitle-${cmd.title}" value="${cmd.title}" placeholder="Edit Title" required />
+                    <input type="text" id="editCommand-${cmd.title}" value="${cmd.command}" placeholder="Edit Command" required />
+                    <input type="text" id="editUrl-${cmd.title}" value="${cmd.url || ''}" placeholder="Edit URL" />
+                    <select id="editProfile-${cmd.title}" required>
+                        ${profiles.map(profile => `
+                            <option value="${profile.title}" ${profile.title === cmd.profile ? 'selected' : ''}>${profile.title}</option>
+                        `).join('')}
+                    </select>
+                    <button class="submitButton" type="submit">Save</button>
+                </form>
+                </div>
             `).join('')}
-        </select>
-        <button class="submitButton" type="submit">Save</button>
-    </form>
-    </div>
-`).join('')}
-</div>
-<div id="accordion">
-<button id="toggleButton" onclick="toggleAccordion()">Add Command</button>
-<form id="commandForm">
-<input type="text" name="title" placeholder="Command Title" required>
-<input type="text" name="command" placeholder="Command" required>
-<input type="text" name="url" placeholder="URL (optional)">
-<select name="profile" id="profileSelect" required>
-    ${profiles.map(profile => `
-        <option value="${profile.title}">${profile.title}</option>
-    `).join('')}
-</select>
-<button type="submit">Add Command</button>
-</form>
-</div>
+        </div>
+
+        <div id="accordion">
+            <button id="toggleButton" onclick="toggleAccordion()">Add Command</button>
+            <form id="commandForm">
+            <input type="text" name="title" placeholder="Command Title" required>
+            <input type="text" name="command" placeholder="Command" required>
+            <input type="text" name="url" placeholder="URL (optional)">
+            <select name="profile" id="profileSelect" required>
+                ${profiles.map(profile => `
+                    <option value="${profile.title}">${profile.title}</option>
+                `).join('')}
+            </select>
+            <button type="submit">Add Command</button>
+        </form>
+        </div>
                 <script src="/data/Sortable.min.js"></script>
                 <script>
                 const nav = document.querySelector('.nav')
