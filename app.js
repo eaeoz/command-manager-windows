@@ -74,6 +74,28 @@ const loadProfiles = () => {
     return JSON.parse(data);
 };
 
+// Save profiles to file
+const saveProfiles = (profiles) => {
+    fs.writeFileSync(profilesFile, JSON.stringify(profiles, null, 2)); // Correctly named function
+};
+
+// Update commands based on profile name change
+function updateCommandsForProfileChange(oldTitle, newTitle) {
+    const commands = loadCommands();
+    let updated = false;
+
+    commands.forEach(command => {
+        if (command.profile === oldTitle) {
+            command.profile = newTitle; // Update the profile name
+            updated = true;
+        }
+    });
+
+    if (updated) {
+        saveCommands(commands); // Save the updated commands
+    }
+}
+
 // Routes
 expressApp.get('/', (req, res) => {
     const commands = loadCommands();
@@ -617,7 +639,7 @@ border-top: none;
             ${commands.map(cmd => `
                 <div class="command-card" data-line-number="${cmd.lineNumber}">
                 ${cmd.url ? `
-                <div class="url-icon" id="url-${cmd.title}" onclick="window.open('${cmd.url}', '_blank')">
+                <div class="url-icon" id="url-${cmd.title}" onclick="openExternalURL('${cmd.url}')">
                     <img src="/data/url.png" alt="Link Icon">
                 </div>
                 ` : ''}
@@ -662,6 +684,202 @@ border-top: none;
         </div>
                 <script src="/data/Sortable.min.js"></script>
                 <script>
+                document.getElementById('addProfileForm').addEventListener('submit', function(event) {
+                    event.preventDefault(); // Prevent the default form submission
+                
+                    // Gather input values
+                    const newProfile = {
+                        title: document.getElementById('newProfileTitle').value,
+                        username: document.getElementById('newProfileUsername').value,
+                        password: document.getElementById('newProfilePassword').value,
+                        host: document.getElementById('newProfileHost').value,
+                        port: document.getElementById('newProfilePort').value
+                    };
+                
+                    // Send a POST request to add the new profile
+                    fetch('/profiles', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(newProfile)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Profile added successfully!');
+                            loadProfilesList(); // Refresh the profile list
+                            document.getElementById('addProfileForm').reset(); // Reset the form
+                        } else {
+                            alert('Failed to add profile.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error adding profile:', error);
+                        alert('An error occurred while adding the profile.');
+                    });
+                });
+                
+                function openTab(evt, tabName) {
+                    // Declare all variables
+                    var i, tabcontent, tablinks;
+                
+                    // Get all elements with class="tabcontent" and hide them
+                    tabcontent = document.getElementsByClassName("tabcontent");
+                    for (i = 0; i < tabcontent.length; i++) {
+                        tabcontent[i].style.display = "none";
+                    }
+                
+                    // Get all elements with class="tablinks" and remove the class "active"
+                    tablinks = document.getElementsByClassName("tablinks");
+                    for (i = 0; i < tablinks.length; i++) {
+                        tablinks[i].className = tablinks[i].className.replace(" active", "");
+                    }
+                
+                    // Show the current tab, and add an "active" class to the button that opened the tab
+                    document.getElementById(tabName).style.display = "block";
+                    evt.currentTarget.className += " active";
+                }
+                
+                // Set default tab
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.querySelector('.tab button:first-child').click();
+                });
+                
+                // Modal functionality
+                const profileModal = document.getElementById('profileModal');
+                const openProfileButton = document.getElementById('openFormButton');
+                const closeProfileModal = document.getElementById('closeProfileModal');
+                
+                // Open the modal and load profiles
+                openProfileButton.addEventListener('click', () => {
+                    loadProfilesList(); // Load profiles when opening the modal
+                    profileModal.style.display = 'block';
+                });
+                
+                // Close the modal
+                closeProfileModal.addEventListener('click', () => {
+                    profileModal.style.display = 'none';
+                });
+                
+                // Close the modal when clicking outside of it
+                window.onclick = (event) => {
+                    if (event.target === profileModal) {
+                        profileModal.style.display = 'none';
+                    }
+                };
+                
+                // Function to load profiles and display them
+                function loadProfilesList() {
+                    fetch('/profiles')
+                        .then(response => response.json())
+                        .then(data => {
+                            const profileList = document.querySelector('.profile-list');
+                            profileList.innerHTML = '';
+                            data.forEach((profile, index) => {
+                                const profileItem = document.createElement('div');
+                                profileItem.className = 'profile-item';
+                                profileItem.innerHTML = \`
+                                    <span>\${profile.title}</span>
+                                    <div>
+                                        <button class="edit-profile" data-index="\${index}" onclick="editProfile(\${index})">Edit</button>
+                                        <button class="delete-profile" data-title="\${profile.title}" onclick="deleteProfile('\${profile.title}')">Delete</button>
+                                    </div>
+                                \`;
+                                profileList.appendChild(profileItem);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error loading profiles:', error);
+                        });
+                }
+                
+                // Function to fetch and display the profile data in the edit form
+                function editProfile(index) {
+                    fetch(\`/profiles/\${index}\`)
+                        .then(response => response.json())
+                        .then(profile => {
+                            document.getElementById('editProfileTitle').value = profile.title;
+                            document.getElementById('editProfileUsername').value = profile.username;
+                            document.getElementById('editProfilePassword').value = profile.password;
+                            document.getElementById('editProfileHost').value = profile.host;
+                            document.getElementById('editProfilePort').value = profile.port;
+                
+                            // Show the edit form
+                            document.getElementById('editProfileForm').style.display = 'block';
+                        })
+                        .catch(error => {
+                            console.error('Error fetching profile:', error);
+                        });
+                }
+                
+                // Handle the edit profile form submission
+                document.getElementById('editProfileForm').addEventListener('submit', function(event) {
+                    event.preventDefault(); // Prevent the default form submission
+                
+                    const index = document.querySelector('.edit-profile').getAttribute('data-index'); // Get the index from the button
+                    const updatedProfile = {
+                        title: document.getElementById('editProfileTitle').value,
+                        username: document.getElementById('editProfileUsername').value,
+                        password: document.getElementById('editProfilePassword').value,
+                        host: document.getElementById('editProfileHost').value,
+                        port: document.getElementById('editProfilePort').value
+                    };
+                
+                    // Send a PUT request to update the profile
+                    fetch(\`/profiles/\${index}\`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(updatedProfile)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Profile updated successfully!');
+                            loadProfilesList(); // Refresh the profile list
+                            document.getElementById('editProfileForm').reset(); // Reset the form
+                            document.getElementById('editProfileForm').style.display = 'none'; // Hide the form
+                            location.reload();
+                        } else {
+                            alert('Failed to update profile.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating profile:', error);
+                        alert('An error occurred while updating the profile.');
+                    });
+                });
+                
+                
+                
+                // Function to delete a profile
+                function deleteProfile(title) {
+                    const confirmation = confirm(\`Are you sure you want to delete the profile "\${title}"?\`);
+                    if (!confirmation) {
+                        return; // If the user cancels, exit the function
+                    }
+                
+                    fetch(\`/profiles/\${encodeURIComponent(title)}\`, {
+                        method: 'DELETE',
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                throw new Error(err.error || 'Error deleting profile, please try again.');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        alert(\`Profile "\${title}" deleted successfully.\`);
+                        loadProfilesList(); // Refresh the list in the modal
+                    })
+                    .catch(error => {
+                        alert(error.message); // Show the error
+                    });
+                }
                 const nav = document.querySelector('.nav')
                 window.addEventListener('scroll', fixNav)
                 
@@ -814,28 +1032,45 @@ border-top: none;
                             
                 
                             function runCommand(command, profileTitle) {
-                                fetch('/run', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ command, profileTitle })
-                                })
-                                .then(response => {
-                                    if (!response.ok) {
-                                        throw new Error(response.statusText);
-                                    }
-                                    return response.json();
-                                })
-                                .then(data => {
-                                    const outputBox = document.getElementById('output');
-                                    outputBox.innerText = data.output || '';
-                                    outputBox.scrollTop = outputBox.scrollHeight;
-                                    if (data.error) {
-                                        showError(data.error);
-                                    }
-                                })
-                                .catch(error => {
-                                    showError(error.message);
-                                });
+                                // Fetch the profiles to check if the selected profile exists
+                                fetch('/profiles')
+                                    .then(response => response.json())
+                                    .then(profiles => {
+                                        const selectedProfile = profiles.find(profile => profile.title === profileTitle);
+                            
+                                        if (!selectedProfile) {
+                                            // Show an alert if the profile is missing
+                                            alert(\`Profile "\${profileTitle}" does not exist in profiles.json. Please update the profile data.\`);
+                                            return; // Abort the command execution if profile is not found
+                                        }
+                            
+                                        // Proceed with command execution if profile exists
+                                        fetch('/run', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ command, profileTitle })
+                                        })
+                                        .then(response => {
+                                            if (!response.ok) {
+                                                throw new Error(response.statusText);
+                                            }
+                                            return response.json();
+                                        })
+                                        .then(data => {
+                                            const outputBox = document.getElementById('output');
+                                            outputBox.innerText = data.output || '';
+                                            outputBox.scrollTop = outputBox.scrollHeight;
+                                            if (data.error) {
+                                                showError(data.error);
+                                            }
+                                        })
+                                        .catch(error => {
+                                            showError(error.message);
+                                        });
+                                    })
+                                    .catch(error => {
+                                        console.error('Error fetching profiles:', error);
+                                    });
                             }
                             
                             function showError(message) {
