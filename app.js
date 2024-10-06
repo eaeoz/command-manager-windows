@@ -684,6 +684,7 @@ border-top: none;
         </div>
                 <script src="/data/Sortable.min.js"></script>
                 <script>
+                const {ipcRenderer} = require('electron');
                 document.getElementById('addProfileForm').addEventListener('submit', function(event) {
                     event.preventDefault(); // Prevent the default form submission
                 
@@ -707,17 +708,17 @@ border-top: none;
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            alert('Profile added successfully!');
+                            ipcRenderer.send('show-alert', 'Profile added successfully!');
                             loadProfilesList(); // Refresh the profile list
-                            document.getElementById('addProfileForm').reset(); // Reset the form
-                            window.location.reload();
+                            // document.getElementById('addProfileForm').reset(); // Reset the form
+                            location.reload();
                         } else {
-                            alert('Failed to add profile.');
+                            ipcRenderer.send('show-alert', 'Failed to add profile: ' + data.error);
                         }
                     })
                     .catch(error => {
                         console.error('Error adding profile:', error);
-                        alert('An error occurred while adding the profile.');
+                        ipcRenderer.send('show-alert', 'An error occurred while adding profile: ' + error.message);
                     });
                 });
                 
@@ -838,18 +839,18 @@ border-top: none;
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            alert('Profile updated successfully!');
+                            ipcRenderer.send('show-alert', 'Profile updated successfully!');
                             loadProfilesList(); // Refresh the profile list
                             document.getElementById('editProfileForm').reset(); // Reset the form
                             document.getElementById('editProfileForm').style.display = 'none'; // Hide the form
                             location.reload();
                         } else {
-                            alert('Failed to update profile.');
+                            ipcRenderer.send('show-alert', 'Failed to update profile: ' + data.error);
                         }
                     })
                     .catch(error => {
                         console.error('Error updating profile:', error);
-                        alert('An error occurred while updating the profile.');
+                        ipcRenderer.send('show-alert', 'An error occurred while updating the profile: ' + error.message);
                     });
                 });
                 
@@ -857,31 +858,39 @@ border-top: none;
                 
                 // Function to delete a profile
                 function deleteProfile(title) {
-                    const confirmation = confirm(\`Are you sure you want to delete the profile "\${title}"?\`);
-                    if (!confirmation) {
-                        return; // If the user cancels, exit the function
-                    }
+                    // Send a message to the main process to show the confirmation dialog
+                    ipcRenderer.invoke('show-confirmation', \`Are you sure you want to delete the profile "\${title}"?\`)
+                        .then(confirmation => {
+                            if (!confirmation) {
+                                return; // If the user cancels, exit the function
+                            }
                 
-                    fetch(\`/profiles/\${encodeURIComponent(title)}\`, {
-                        method: 'DELETE',
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.json().then(err => {
-                                throw new Error(err.error || 'Error deleting profile, please try again.');
+                            // Proceed to delete the profile if confirmed
+                            fetch(\`/profiles/\${encodeURIComponent(title)}\`, {
+                                method: 'DELETE',
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    return response.json().then(err => {
+                                        throw new Error(err.error || 'Error deleting profile, please try again.');
+                                    });
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                ipcRenderer.send('show-alert', 'Profile deleted successfully!');
+                                loadProfilesList(); // Refresh the list in the modal
+                                location.reload();
+                            })
+                            .catch(error => {
+                                ipcRenderer.send('show-alert', 'An error occurred while deleting the profile: ' + error.message);
                             });
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        alert(\`Profile "\${title}" deleted successfully.\`);
-                        loadProfilesList(); // Refresh the list in the modal
-                        location.reload();
-                    })
-                    .catch(error => {
-                        alert(error.message); // Show the error
-                    });
+                        })
+                        .catch(error => {
+                            ipcRenderer.send('show-alert', 'An error occurred while showing the confirmation dialog: ' + error.message);
+                        });
                 }
+                
                 const nav = document.querySelector('.nav')
                 window.addEventListener('scroll', fixNav)
                 
@@ -991,7 +1000,7 @@ border-top: none;
                                 });
                             }
                             
-                            const {ipcRenderer} = require('electron');
+                            
                             // Add event listener for form submission
                             document.getElementById('commandForm').addEventListener('submit', function (event) {
                                 event.preventDefault();
@@ -1040,7 +1049,7 @@ border-top: none;
                             
                                         if (!selectedProfile) {
                                             // Show an alert if the profile is missing
-                                            alert(\`Profile "\${profileTitle}" does not exist in profiles.json. Please update the profile data.\`);
+                                            ipcRenderer.send('show-alert', 'Profile not found');
                                             return; // Abort the command execution if profile is not found
                                         }
                             
@@ -1400,15 +1409,14 @@ ipcMain.on('show-alert', (event, message) => {
     });
 });
 
-ipcMain.on('show-confirmation', (event, message) => {
-    const response = dialog.showMessageBoxSync({
+ipcMain.handle('show-confirmation', async (event, message) => {
+    const response = await dialog.showMessageBox({
         type: 'warning',
         buttons: ['Cancel', 'OK'],
         title: 'Confirmation',
         message: message,
     });
-    // Send the response back to the renderer process
-    event.reply('confirmation-response', response === 1); // 1 means OK was clicked
+    return response.response === 1; // 1 means OK was clicked
 });
 
 // Quit when all windows are closed
