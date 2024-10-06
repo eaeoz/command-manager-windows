@@ -1,2 +1,205 @@
 [
+  {
+    "lineNumber": 1,
+    "title": "check ip address",
+    "command": "./checkipregion",
+    "url": "",
+    "profile": "server"
+  },
+  {
+    "lineNumber": 2,
+    "title": "Start VPN",
+    "command": "./openvpnstart",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 3,
+    "title": "stop vpn",
+    "command": "./openvpnstop",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 4,
+    "title": "Check Containers",
+    "command": "./startcontainercheck",
+    "url": "",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 5,
+    "title": "PRINT container names",
+    "command": "./saycontainernames",
+    "url": "",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 6,
+    "title": "Restart ISP Router",
+    "command": "./reboot.sh",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 7,
+    "title": "Restart Access Point",
+    "command": "./rebootap.sh",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 8,
+    "title": "start vault",
+    "command": "docker start vault",
+    "url": "https://pass.server.lan",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 9,
+    "title": "Music/Deemix jellyfin check",
+    "command": "cd /jellyfin/Music/Deemix && ls | wc -l",
+    "url": "",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 10,
+    "title": "move downloaded music",
+    "command": "cd /jellyfin/Music/Deemix && mv *.mp3 /shared/Media/Music/Deemix",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 11,
+    "title": "Start mp3 downloader",
+    "command": "docker start deemix",
+    "url": "http://192.168.10.2:6595/",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 12,
+    "title": "stop mp3 downloader",
+    "command": "docker stop deemix",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 13,
+    "title": "start torrent",
+    "command": "docker start tor prowlarr",
+    "url": "http://192.168.10.2:9696",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 14,
+    "title": "stop torrent",
+    "command": "docker stop tor prowlarr",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 15,
+    "title": "start tube downloader",
+    "command": "./youtubestart",
+    "url": "http://192.168.10.2:8998/",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 16,
+    "title": "stop tube downloader",
+    "command": "./youtubestop",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 17,
+    "title": "Start Trilium",
+    "command": "docker start trilium_trilium_1 deemix",
+    "url": "http://192.168.10.2:3336",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 18,
+    "title": "Stop Trilium",
+    "command": "docker stop trilium_trilium_1 deemix",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 19,
+    "title": "Start Wiki",
+    "command": "docker start mywiki_tiddlywiki_1",
+    "url": "http://192.168.10.2:3335/",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 20,
+    "title": "Stop Wiki",
+    "command": "docker stop mywiki_tiddlywiki_1",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 21,
+    "title": "start portainer",
+    "command": "docker start portainer_portainer_1",
+    "url": "http://192.168.10.2:9001/",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 22,
+    "title": "start it-tools",
+    "command": "docker start it-tools",
+    "url": "http://192.168.10.2:3666/",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 23,
+    "title": "stop portainer",
+    "command": "docker stop portainer_portainer_1",
+    "url": "",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 24,
+    "title": "stop it-tools",
+    "command": "docker stop it-tools",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 25,
+    "title": "ping google",
+    "command": "ping -c 2 google.com",
+    "url": "http://google.com",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 26,
+    "title": "ping gateway",
+    "command": "ping -c 2 192.168.10.1",
+    "url": "http://192.168.10.1",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 27,
+    "title": "reboot gateway",
+    "command": "./rebootgateway",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 28,
+    "title": "start rethinkdb",
+    "command": "docker start rethinkdb rethinkdb-query-app_app_1",
+    "url": "http://192.168.10.2:30015/",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 29,
+    "title": "stop rethinkdb",
+    "command": "docker stop rethinkdb rethinkdb-query-app_app_1",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 30,
+    "title": "start directus",
+    "command": "docker start directus_db_1 directus_adminer_1 directus_directus_1",
+    "url": "https://directus.server.lan/",
+    "profile": "test2"
+  },
+  {
+    "lineNumber": 31,
+    "title": "stop directus",
+    "command": "docker stop directus_db_1 directus_adminer_1 directus_directus_1",
+    "profile": "test2"
+  }
 ]
