@@ -606,6 +606,7 @@ border-top: none;
             <div id="EditProfile" class="tabcontent" style="display:none;">
             <h3>Edit Profile</h3>
             <form class="edit-profile-form" id="editProfileForm" style="display:none;">
+                <input type="hidden" id="editProfileIndex">
                 <input type="text" id="editProfileTitle" placeholder="Profile Title" required />
                 <input type="text" id="editProfileUsername" placeholder="Username" required />
                 <input type="password" id="editProfilePassword" placeholder="Password" required />
@@ -784,7 +785,7 @@ border-top: none;
                                 profileItem.innerHTML = \`
                                     <span>\${profile.title}</span>
                                     <div>
-                                        <button class="edit-profile" data-index="\${index}" onclick="editProfile(\${index})">Edit</button>
+                                    <button class="edit-profile" data-index="\${index}" onclick="editProfile(this)">Edit</button>
                                         <button class="delete-profile" data-title="\${profile.title}" onclick="deleteProfile('\${profile.title}')">Delete</button>
                                     </div>
                                 \`;
@@ -796,8 +797,10 @@ border-top: none;
                         });
                 }
                 
-                // Function to fetch and display the profile data in the edit form
-                function editProfile(index) {
+                // Updated editProfile function to accept the button element
+                function editProfile(button) {
+                    const index = button.getAttribute('data-index');
+                    console.log(\`Editing profile: \${index}\`);
                     fetch(\`/profiles/\${index}\`)
                         .then(response => response.json())
                         .then(profile => {
@@ -807,6 +810,9 @@ border-top: none;
                             document.getElementById('editProfileHost').value = profile.host;
                             document.getElementById('editProfilePort').value = profile.port;
                 
+                            // Store the index in the hidden field
+                            document.getElementById('editProfileIndex').value = index;
+        
                             // Show the edit form
                             document.getElementById('editProfileForm').style.display = 'block';
                         })
@@ -815,11 +821,11 @@ border-top: none;
                         });
                 }
                 
-                // Handle the edit profile form submission
                 document.getElementById('editProfileForm').addEventListener('submit', function(event) {
                     event.preventDefault(); // Prevent the default form submission
                 
-                    const index = document.querySelector('.edit-profile').getAttribute('data-index'); // Get the index from the button
+                    const index = document.getElementById('editProfileIndex').value; // Get the index from the hidden input
+                    console.log(\`Edited Profile: \${index}\`);
                     const updatedProfile = {
                         title: document.getElementById('editProfileTitle').value,
                         username: document.getElementById('editProfileUsername').value,
@@ -838,11 +844,12 @@ border-top: none;
                     })
                     .then(response => response.json())
                     .then(data => {
+                        // console.log('Update response:', data); // Log the response
                         if (data.success) {
                             ipcRenderer.send('show-alert', 'Profile updated successfully!');
                             loadProfilesList(); // Refresh the profile list
-                            document.getElementById('editProfileForm').reset(); // Reset the form
-                            document.getElementById('editProfileForm').style.display = 'none'; // Hide the form
+                            this.reset(); // Reset the form fields
+                            this.style.display = 'none'; // Hide the form
                             location.reload();
                         } else {
                             ipcRenderer.send('show-alert', 'Failed to update profile: ' + data.error);
