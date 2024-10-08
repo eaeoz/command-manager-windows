@@ -675,6 +675,13 @@ border-top: none;
         margin: 40px 0;
         transform: translateX(-100%);
         transition: transform 0.4s ease-in;
+        cursor: pointer; /* Changes the mouse pointer to a hand when hovering */
+        list-style: none; /* Optional: removes bullet points */
+        padding: 10px; /* Optional: adds padding for better click area */
+      }
+
+      navx ul li:hover {
+        background-color: #8B0000; /* Optional: adds a hover effect */
       }
       
       navx ul li i {
