@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "lineNumber": 1,
+    "title": "tset",
+    "command": "test",
+    "url": "tset",
+    "profile": "Profile 1"
+  }
+]

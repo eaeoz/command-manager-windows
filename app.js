@@ -117,6 +117,7 @@ expressApp.get('/', (req, res) => {
         height: 100vh;
         margin: 0;
         background-color: #000000;
+        overflow: hidden;
     }
 
     h2 {
@@ -584,6 +585,7 @@ border-top: none;
         list-style-type: none;
         align-items: center;
         justify-content: center;
+        -webkit-app-region: drag;
     }
 
     .containerx {
@@ -700,6 +702,33 @@ border-top: none;
         color: #ff7979;
         font-weight: bold;
       }
+      .close-button {
+        position: fixed; /* Fixed position to stay in view */
+        bottom: 10px; /* Distance from the bottom */
+        right: 10px; /* Distance from the right */
+        background-color: red; /* Red background color */
+        border: none; /* No border */
+        border-radius: 50%; /* Make it circular */
+        width: 60px; /* Increased width of the button */
+        height: 60px; /* Increased height of the button */
+        cursor: pointer; /* Pointer cursor on hover */
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Optional shadow effect */
+        transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
+    }
+    
+    .close-button i {
+        font-size: 30px; /* Larger icon size */
+        color: white; /* White icon color */
+    }
+    
+    .close-button:hover {
+        background-color: darkred; /* Change background color on hover */
+        transform: scale(1.1); /* Scale up slightly on hover */
+    }
+    
+    .close-button:active {
+        transform: scale(0.95); /* Scale down when active (clicked) */
+    }
 </style>
 <link rel="stylesheet" type="text/css" href="/data/css/all.min.css">
 <div class="containerx">
@@ -766,6 +795,9 @@ border-top: none;
             <div id="output"></div>
             <div class="loading-text">0%</div>
         </div>
+        <button class="close-button" onclick="window.close()"> Close 
+        <i class="fas fa-times"></i>
+    </button>
         </div>
 
 
@@ -825,6 +857,7 @@ border-top: none;
           <li onclick="openExternalURL('mailto:sedatergoz@gmail.com')"><i class="fas fa-envelope"></i> Contact</li>
         </ul>
       </navx>
+      
 
       <script src="/data/js/all.min.js"></script>
       <script src="/data/js/Sortable.min.js"></script>
@@ -1555,6 +1588,9 @@ const createWindow = async () => {
     const win = new BrowserWindow({
         width: savedBounds.width,
         height: savedBounds.height,
+        transparent: true,   // Makes the window background transparent
+        frame: false,        // Removes the default window frame (title bar, close buttons)
+        hasShadow: false,    // Prevents the window from having a shadow (better for transparency)
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
