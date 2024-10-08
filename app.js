@@ -6,11 +6,7 @@ const envPath = path.resolve(__dirname, 'config', '.env');
 
 // Default .env content
 const defaultEnvContent = `
-WINDOW_WIDTH=1280
-WINDOW_HEIGHT=720
 COMMAND_TIMEOUT=10000
-COMMANDS_FILE=commands.json
-PROFILES_FILE=profiles.json
 `;
 
 // Check if the .env file exists
@@ -27,6 +23,20 @@ require('dotenv').config({ path: './config/.env' });
 
 
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+
+let store; // Declare store variable
+
+async function loadStore() {
+    const { default: Store } = await import('electron-store');
+    // Get the userData directory and define the config folder path
+    const configFolderPath = path.join(__dirname, 'config');
+    // Log the path to make sure it's correct
+    console.log('Config folder path:', configFolderPath);
+    store = new Store({
+        cwd: configFolderPath // Specify custom directory for electron-store
+    });
+}
+
 const logPath = path.join(__dirname, 'error.log');
 const log = require('electron-log');
 
@@ -36,8 +46,8 @@ const bodyParser = require('body-parser');
 const { Client } = require('ssh2');
 
 const PORT = process.env.PORT || 3000;
-const commandsFile = path.join(__dirname, 'config', process.env.COMMANDS_FILE || 'commands.json');
-const profilesFile = path.join(__dirname, 'config', process.env.PROFILES_FILE || 'profiles.json');
+const commandsFile = path.join(__dirname, 'config', 'commands.json');
+const profilesFile = path.join(__dirname, 'config', 'profiles.json');
 
 // Configure electron-log to write to the same log file
 log.transports.file.file = logPath;
@@ -1536,23 +1546,29 @@ expressApp.listen(PORT, () => {
     console.log(`Express server is running on http://localhost:${PORT}`);
 });
 
-// Function to create the Electron window
-const createWindow = () => {
+
+const createWindow = async () => {
+    await loadStore(); // Ensure the store is loaded before creating the window
+
+    const savedBounds = store.get('windowBounds', { width: 1920, height: 1080 });
+
     const win = new BrowserWindow({
-        width: parseInt(process.env.WINDOW_WIDTH, 10) || 1920,
-        height: parseInt(process.env.WINDOW_HEIGHT, 10) || 1080,
+        width: savedBounds.width,
+        height: savedBounds.height,
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false, // Allow use of Node.js APIs in the renderer process
+            contextIsolation: false,
         }
     });
 
-    // Load the Express app in the Electron window
-    win.loadURL(`http://localhost:${PORT}`);
+    win.loadURL(`http://localhost:${process.env.PORT || 3000}`);
+
+    // Save window size and position when closed
+    win.on('close', () => {
+        store.set('windowBounds', win.getBounds());
+    });
 };
 
-// Start Electron when ready
-app.whenReady().then(createWindow);
 
 ipcMain.on('show-alert', (event, message) => {
     dialog.showMessageBox({
@@ -1571,6 +1587,9 @@ ipcMain.handle('show-confirmation', async (event, message) => {
     return response.response === 1; // 1 means OK was clicked
 });
 
+// Make sure to call createWindow after app is ready
+app.whenReady().then(createWindow);
+
 // Quit when all windows are closed
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -1578,9 +1597,6 @@ app.on('window-all-closed', () => {
     }
 });
 
-// On macOS, recreate a window in the app when the dock icon is clicked and no other windows are open
 app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
-    }
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
