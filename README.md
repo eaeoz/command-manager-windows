@@ -4,12 +4,6 @@
 
 [Installation File](https://drive.google.com/drive/folders/1Fw_sANe6mx-e9P2E3e_leCb6ssTtbbGt?usp=drive_link)
 
-##### You can change setting using config/.env file for command timeout, default 10 seconds
-
-- `C:\Users\%USERNAME%\AppData\Local\CommandManager\resources\app\config\.env`
-
----
-
 ### Docker Instruction
 
 [Instruction](https://hub.docker.com/r/eaeoz/command-manager-docker)
@@ -35,3 +29,9 @@
 ##### Build
 
 `npm run build`
+
+### You can change setting of command timeout using config/.env file (default 10 seconds)
+
+- `C:\Users\%USERNAME%\AppData\Local\CommandManager\resources\app\config\.env`
+
+---
