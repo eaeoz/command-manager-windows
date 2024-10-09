@@ -189,6 +189,7 @@ expressApp.get('/', (req, res) => {
     }
 
     .modal-content {
+        text-align: center;
         background-color: #f4f4f4;
         margin: 10% auto;
         padding: 20px;
@@ -198,6 +199,14 @@ expressApp.get('/', (req, res) => {
         border-radius: 10px;
         max-height: 80vh;
         overflow-y: auto; 
+    }
+
+    .modal-content h2 {
+        background-color: #F44336;
+        display: inline-block;
+        padding: 5px;
+        border-radius: 5px;
+        margin-bottom: 10px;
     }
 
     .close {
