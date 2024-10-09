@@ -30,6 +30,8 @@
 
 `npm run build`
 
+---
+
 ### You can change setting of command timeout using config/.env file (default 10 seconds)
 
 - `C:\Users\%USERNAME%\AppData\Local\CommandManager\resources\app\config\.env`
