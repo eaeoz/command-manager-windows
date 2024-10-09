@@ -16,7 +16,7 @@
 
 ---
 
-### You can run and test npm package as well (optional)
+### You can run and test npm package (optional)
 
 ##### Install pkg globally
 
