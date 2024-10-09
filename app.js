@@ -6,11 +6,7 @@ const envPath = path.resolve(__dirname, 'config', '.env');
 
 // Default .env content
 const defaultEnvContent = `
-WINDOW_WIDTH=1280
-WINDOW_HEIGHT=720
 COMMAND_TIMEOUT=10000
-COMMANDS_FILE=commands.json
-PROFILES_FILE=profiles.json
 `;
 
 // Check if the .env file exists
@@ -27,6 +23,20 @@ require('dotenv').config({ path: './config/.env' });
 
 
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+
+let store; // Declare store variable
+
+async function loadStore() {
+    const { default: Store } = await import('electron-store');
+    // Get the userData directory and define the config folder path
+    const configFolderPath = path.join(__dirname, 'config');
+    // Log the path to make sure it's correct
+    console.log('Config folder path:', configFolderPath);
+    store = new Store({
+        cwd: configFolderPath // Specify custom directory for electron-store
+    });
+}
+
 const logPath = path.join(__dirname, 'error.log');
 const log = require('electron-log');
 
@@ -36,8 +46,8 @@ const bodyParser = require('body-parser');
 const { Client } = require('ssh2');
 
 const PORT = process.env.PORT || 3000;
-const commandsFile = path.join(__dirname, 'config', process.env.COMMANDS_FILE || 'commands.json');
-const profilesFile = path.join(__dirname, 'config', process.env.PROFILES_FILE || 'profiles.json');
+const commandsFile = path.join(__dirname, 'config', 'commands.json');
+const profilesFile = path.join(__dirname, 'config', 'profiles.json');
 
 // Configure electron-log to write to the same log file
 log.transports.file.file = logPath;
@@ -104,16 +114,13 @@ expressApp.get('/', (req, res) => {
     <style>
     body {
         font-family: Arial, sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
         height: 100vh;
         margin: 0;
         background-color: #000000;
+        overflow: hidden;
     }
 
-    h1 {
+    h2 {
         text-shadow: 4px 4px 4px rgba(255,255,255, 0.5);
         color: white;
         margin-bottom: 10px;
@@ -125,9 +132,9 @@ expressApp.get('/', (req, res) => {
         position: fixed;
         top: 0;
         right: 0;
-        width: 80px;
-        height: 80px;
-        background-color: #333;
+        width: 60px;
+        height: 46px;
+        background-color: #F44336;
         border-radius: 0 0 0 80px;
         cursor: pointer;
         display: flex;
@@ -138,7 +145,7 @@ expressApp.get('/', (req, res) => {
 
     /* Hamburger icon */
     .hamburger-icon {
-        width: 30px;
+        width: 25px;
         height: 3px;
         background-color: white;
         position: relative;
@@ -152,7 +159,7 @@ expressApp.get('/', (req, res) => {
     .hamburger-icon::before,
     .hamburger-icon::after {
         content: "";
-        width: 30px;
+        width: 25px;
         height: 3px;
         background-color: white;
         position: absolute;
@@ -313,7 +320,8 @@ expressApp.get('/', (req, res) => {
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
         transform: scale(0.9) translateY(2px);
         border-radius: 50px 50px;
-        background-color: #4CAF50;
+        background: radial-gradient(ellipse at top, #e66465, transparent),
+        radial-gradient(ellipse at bottom, #9198e5, transparent);
         color: white;
         border: none;
         width: 100%;
@@ -577,8 +585,160 @@ border-top: none;
         list-style-type: none;
         align-items: center;
         justify-content: center;
+        -webkit-app-region: drag;
+    }
+
+    .containerx {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+        transition: all 0.3s ease-in-out;
+        transform-origin: top left;
+        transition: transform 0.5s linear;
+
+    }
+
+    .containerx.show-nav {
+        transform: rotate(-20deg);
+      }
+
+    .circle-container {
+        position: fixed;
+        top: -100px;
+        left: -100px;
+      }
+      
+      .circle {
+        background-color: #F44336;
+        height: 155px;
+        width: 165px;
+        border-radius: 50%;
+        position: relative;
+        transition: transform 0.5s linear;
+      }
+      
+      .containerx.show-nav .circle {
+        transform: rotate(-90deg);
+      }
+      
+      .circle button {
+        cursor: pointer;
+        position: absolute;
+        top: 47%;
+        left: 50%;
+        height: 100px;
+        background: transparent;
+        border: 0;
+        font-size: 22px;
+        color: #fff;
+      }
+      
+      .circle button:focus{
+        outline: none;
+      }
+      
+      .circle button#open {
+        left: 60%;
+      }
+      
+      .circle button#close {
+        top: 60%;
+        transform: rotate(90deg);
+        transform-origin: top left;
+      }
+
+      .containerx.show-nav + navx li {
+        transform: translateX(0);
+        transition-delay: 0.3s;
+      }
+
+      navx {
+        position: fixed;
+        bottom: 40px;
+        left: 0;
+        z-index: 100;
+      }
+      
+      navx ul {
+        list-style-type: none;
+        padding-left: 30px;
+      }
+      
+      navx ul li {
+        text-transform: uppercase;
+        color: #fff;
+        margin: 40px 0;
+        transform: translateX(-100%);
+        transition: transform 0.4s ease-in;
+        cursor: pointer; /* Changes the mouse pointer to a hand when hovering */
+        list-style: none; /* Optional: removes bullet points */
+        padding: 10px; /* Optional: adds padding for better click area */
+      }
+
+      navx ul li:hover {
+        background-color: #8B0000; /* Optional: adds a hover effect */
+      }
+      
+      navx ul li i {
+        font-size: 20px;
+        margin-right: 10px;
+      }
+      
+      navx ul li + li {
+        margin-left: 15px;
+        transform: translateX(-150%);
+      }
+      
+      navx ul li + li + li {
+        margin-left: 30px;
+        transform: translateX(-200px);
+      }
+      
+      navx a{
+        color: #fafafa;
+        text-decoration: none;
+        transition: all 0.5s;
+      }
+      
+      navx a:hover {
+        color: #ff7979;
+        font-weight: bold;
+      }
+      .close-button {
+        position: fixed; /* Fixed position to stay in view */
+        bottom: 7px; /* Distance from the bottom */
+        right: 32px; /* Distance from the right */
+        background-color: red; /* Red background color */
+        border: none; /* No border */
+        border-radius: 50%; /* Make it circular */
+        width: 60px; /* Increased width of the button */
+        height: 30px; /* Increased height of the button */
+        cursor: pointer; /* Pointer cursor on hover */
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Optional shadow effect */
+        transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
+    }
+    
+    .close-button i {
+        font-size: 30px; /* Larger icon size */
+        color: white; /* White icon color */
+    }
+    
+    .close-button:hover {
+        background-color: darkred; /* Change background color on hover */
+        transform: scale(1.1); /* Scale up slightly on hover */
+    }
+    
+    .close-button:active {
+        transform: scale(0.95); /* Scale down when active (clicked) */
     }
 </style>
+<link rel="stylesheet" type="text/css" href="/data/css/all.min.css">
+<div class="containerx">
 <div id="profileModal" class="modal">
         <div class="modal-content">
             <span class="close" id="closeProfileModal">&times;</span>
@@ -622,17 +782,29 @@ border-top: none;
             </div>
         </div>
     </div>
-    
+    <div class="circle-container">
+    <div class="circle">
+      <button id="close">
+        <i class="fas fa-times"></i>
+      </button>
+      <button id="open">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
         <!-- Quarter-circle button -->
         <div class="quarter-circle-button" id="openFormButton">
             <div class="hamburger-icon"></div>
         </div>
         <div class="nav">
         <div class="container">
-            <h1>Command Manager</h1>
+            <h2>Command Manager</h2>
             <div id="output"></div>
             <div class="loading-text">0%</div>
         </div>
+        <button class="close-button" onclick="window.close()"> Close 
+        <i class="fas fa-times"></i>
+    </button>
         </div>
 
 
@@ -683,8 +855,31 @@ border-top: none;
             <button type="submit">Add Command</button>
         </form>
         </div>
-                <script src="/data/Sortable.min.js"></script>
+        </div>
+        <navx>
+        <ul>
+        
+          <li onclick="openExternalURL('https://github.com/eaeoz/command-manager-docker')"><i class="fa-brands fa-github"></i> Github</li>
+          <li onclick="openExternalURL('https://hub.docker.com/r/eaeoz/command-manager-docker')"><i class="fa-brands fa-docker"></i> DockerHub</li>
+          <li onclick="openExternalURL('mailto:sedatergoz@gmail.com')"><i class="fas fa-envelope"></i> Contact</li>
+        </ul>
+      </navx>
+      
+
+      <script src="/data/js/all.min.js"></script>
+      <script src="/data/js/Sortable.min.js"></script>
                 <script>
+                const open = document.querySelector("#open")
+                const close = document.querySelector("#close");
+                const container = document.querySelector(".containerx");
+                
+                open.addEventListener('click', ()=>{
+                    container.classList.add("show-nav");
+                })
+                
+                close.addEventListener('click', ()=>{
+                    container.classList.remove("show-nav")
+                })
                 const {ipcRenderer} = require('electron');
                 document.getElementById('addProfileForm').addEventListener('submit', function(event) {
                     event.preventDefault(); // Prevent the default form submission
@@ -1096,7 +1291,7 @@ border-top: none;
                                 outputDiv.style.display = 'none';
                             
                                 // Create a new error message element
-                                const errorMessage = document.createElement('h1');
+                                const errorMessage = document.createElement('h2');
                                 errorMessage.textContent = message;
                                 errorMessage.style.color = 'red'; // Style the error message
                                 errorMessage.style.textAlign = 'center'; // Center align the message
@@ -1391,23 +1586,32 @@ expressApp.listen(PORT, () => {
     console.log(`Express server is running on http://localhost:${PORT}`);
 });
 
-// Function to create the Electron window
-const createWindow = () => {
+
+const createWindow = async () => {
+    await loadStore(); // Ensure the store is loaded before creating the window
+
+    const savedBounds = store.get('windowBounds', { width: 1920, height: 1080 });
+
     const win = new BrowserWindow({
-        width: parseInt(process.env.WINDOW_WIDTH, 10) || 1920,
-        height: parseInt(process.env.WINDOW_HEIGHT, 10) || 1080,
+        width: savedBounds.width,
+        height: savedBounds.height,
+        transparent: true,   // Makes the window background transparent
+        frame: false,        // Removes the default window frame (title bar, close buttons)
+        hasShadow: false,    // Prevents the window from having a shadow (better for transparency)
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false, // Allow use of Node.js APIs in the renderer process
+            contextIsolation: false,
         }
     });
 
-    // Load the Express app in the Electron window
-    win.loadURL(`http://localhost:${PORT}`);
+    win.loadURL(`http://localhost:${process.env.PORT || 3000}`);
+
+    // Save window size and position when closed
+    win.on('close', () => {
+        store.set('windowBounds', win.getBounds());
+    });
 };
 
-// Start Electron when ready
-app.whenReady().then(createWindow);
 
 ipcMain.on('show-alert', (event, message) => {
     dialog.showMessageBox({
@@ -1426,6 +1630,9 @@ ipcMain.handle('show-confirmation', async (event, message) => {
     return response.response === 1; // 1 means OK was clicked
 });
 
+// Make sure to call createWindow after app is ready
+app.whenReady().then(createWindow);
+
 // Quit when all windows are closed
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -1433,9 +1640,6 @@ app.on('window-all-closed', () => {
     }
 });
 
-// On macOS, recreate a window in the app when the dock icon is clicked and no other windows are open
 app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
-    }
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
