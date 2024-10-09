@@ -8,7 +8,7 @@
 
 - `C:\Users\%USERNAME%\AppData\Local\CommandManager\resources\app\config\.env`
 
-### Docker instruction:
+### Docker Instruction:
 
 [Instruction](https://hub.docker.com/r/eaeoz/command-manager-docker)
 
