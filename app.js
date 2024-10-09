@@ -711,13 +711,13 @@ border-top: none;
       }
       .close-button {
         position: fixed; /* Fixed position to stay in view */
-        bottom: 10px; /* Distance from the bottom */
-        right: 10px; /* Distance from the right */
+        bottom: 7px; /* Distance from the bottom */
+        right: 32px; /* Distance from the right */
         background-color: red; /* Red background color */
         border: none; /* No border */
         border-radius: 50%; /* Make it circular */
         width: 60px; /* Increased width of the button */
-        height: 60px; /* Increased height of the button */
+        height: 30px; /* Increased height of the button */
         cursor: pointer; /* Pointer cursor on hover */
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Optional shadow effect */
         transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
@@ -860,7 +860,7 @@ border-top: none;
         <ul>
         
           <li onclick="openExternalURL('https://github.com/eaeoz/command-manager-docker')"><i class="fa-brands fa-github"></i> Github</li>
-          <li onclick="openExternalURL('https://hub.docker.com/r/eaeoz/command-manager')"><i class="fa-brands fa-docker"></i> DockerHub</li>
+          <li onclick="openExternalURL('https://hub.docker.com/r/eaeoz/command-manager-docker')"><i class="fa-brands fa-docker"></i> DockerHub</li>
           <li onclick="openExternalURL('mailto:sedatergoz@gmail.com')"><i class="fas fa-envelope"></i> Contact</li>
         </ul>
       </navx>
