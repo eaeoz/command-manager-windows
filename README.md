@@ -4,7 +4,7 @@
 
 [Latest Release](https://github.com/eaeoz/command-manager-windows/releases/download/1.0.0/CommandManager_1.0.0.exe)
 
-Backup your configuration for installation to the another system:
+Backup your configuration files for installation to the another system:
 
 `C:\Users\%UserProfile%\AppData\Local\CommandManager\resources\app\config`
 
