@@ -1,6 +1,6 @@
-# CommandManager App
+# 👏 CommandManager App
 
-### Download Windows Desktop Executable Setup
+### 👇 Download Windows Desktop Executable Setup
 
 [Latest Release](https://github.com/eaeoz/command-manager-windows/releases/download/1.0.0/CommandManager_1.0.0.exe)
 
