@@ -1614,9 +1614,17 @@ expressApp.listen(PORT, () => {
 const createWindow = async () => {
     await loadStore(); // Ensure the store is loaded before creating the window
 
-    const savedBounds = store.get('windowBounds', { width: 1920, height: 1080 });
+    // Get saved bounds with default values
+    const savedBounds = store.get('windowBounds', { 
+        x: undefined,  // Let Electron decide initial position if not saved
+        y: undefined,
+        width: 1920, 
+        height: 1080 
+    });
 
     const win = new BrowserWindow({
+        x: savedBounds.x,
+        y: savedBounds.y,
         width: savedBounds.width,
         height: savedBounds.height,
         transparent: true,   // Makes the window background transparent
@@ -1630,10 +1638,19 @@ const createWindow = async () => {
 
     win.loadURL(`http://localhost:${process.env.PORT || 3000}`);
 
-    // Save window size and position when closed
-    win.on('close', () => {
-        store.set('windowBounds', win.getBounds());
-    });
+    // Save window size and position when moved or resized
+    const saveBounds = () => {
+        if (!win.isMinimized() && !win.isMaximized()) {
+            store.set('windowBounds', win.getBounds());
+        }
+    };
+
+    // Save bounds on various events
+    win.on('resize', saveBounds);
+    win.on('move', saveBounds);
+    
+    // Save one final time when closing
+    win.on('close', saveBounds);
 };
 
 
