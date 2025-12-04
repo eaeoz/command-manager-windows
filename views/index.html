@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Manager</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/data/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="header-left">
+                <i class="fas fa-terminal"></i>
+                <h1>Command Manager</h1>
+            </div>
+            <div class="header-right">
+                <button class="btn-icon" id="profilesBtn" title="Manage Profiles">
+                    <i class="fas fa-users-cog"></i>
+                </button>
+                <button class="btn-icon" id="settingsBtn" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button class="btn-icon btn-close" onclick="window.close()" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Quick Actions</h2>
+            </div>
+            <div class="sidebar-content">
+                <button class="btn-primary" id="addCommandBtn">
+                    <i class="fas fa-plus"></i>
+                    Add Command
+                </button>
+                <div class="stats-card">
+                    <div class="stat-item">
+                        <i class="fas fa-server"></i>
+                        <div>
+                            <span class="stat-value" id="profileCount">0</span>
+                            <span class="stat-label">Profiles</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-code"></i>
+                        <div>
+                            <span class="stat-value" id="commandCount">0</span>
+                            <span class="stat-label">Commands</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="links-section">
+                    <h3>Resources</h3>
+                    <a href="#" class="sidebar-link" onclick="openExternalURL('https://github.com/eaeoz/command-manager-windows')">
+                        <i class="fab fa-github"></i>
+                        GitHub Repository
+                    </a>
+                    <a href="#" class="sidebar-link" onclick="openExternalURL('https://hub.docker.com/r/eaeoz/command-manager-docker')">
+                        <i class="fab fa-docker"></i>
+                        Docker Hub
+                    </a>
+                    <a href="#" class="sidebar-link" onclick="openExternalURL('mailto:sedatergoz@gmail.com')">
+                        <i class="fas fa-envelope"></i>
+                        Contact
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Commands Grid -->
+        <section class="commands-section">
+            <div class="section-header">
+                <h2>Your Commands</h2>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search commands...">
+                </div>
+            </div>
+            <div class="commands-grid" id="commandsGrid">
+                <!-- Commands will be dynamically inserted here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Output Console -->
+    <div class="console" id="console">
+        <div class="console-header">
+            <div class="console-title">
+                <i class="fas fa-terminal"></i>
+                <span>Output Console</span>
+            </div>
+            <button class="btn-icon" id="clearConsole" title="Clear">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="console-content" id="consoleOutput">
+            <div class="console-placeholder">
+                <i class="fas fa-info-circle"></i>
+                <p>Command output will appear here</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manage Profiles</h2>
+                <button class="btn-icon" id="closeProfileModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="addProfile">
+                        <i class="fas fa-plus"></i>
+                        Add Profile
+                    </button>
+                    <button class="tab-btn" data-tab="editProfile">
+                        <i class="fas fa-edit"></i>
+                        Manage Profiles
+                    </button>
+                </div>
+                
+                <div class="tab-content active" id="addProfile">
+                    <form class="form" id="addProfileForm">
+                        <div class="form-group">
+                            <label for="newProfileTitle">Profile Name</label>
+                            <input type="text" id="newProfileTitle" placeholder="e.g., Production Server" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newProfileHost">Host</label>
+                            <input type="text" id="newProfileHost" placeholder="e.g., 192.168.1.100" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="newProfileUsername">Username</label>
+                                <input type="text" id="newProfileUsername" placeholder="e.g., root" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="newProfilePort">Port</label>
+                                <input type="number" id="newProfilePort" value="22" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newProfilePassword">Password</label>
+                            <input type="password" id="newProfilePassword" placeholder="Enter password" required>
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Add Profile
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="tab-content" id="editProfile">
+                    <div class="profile-list" id="profileList">
+                        <!-- Profiles will be dynamically inserted here -->
+                    </div>
+                    <form class="form" id="editProfileForm" style="display: none;">
+                        <input type="hidden" id="editProfileIndex">
+                        <div class="form-group">
+                            <label for="editProfileTitle">Profile Name</label>
+                            <input type="text" id="editProfileTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editProfileHost">Host</label>
+                            <input type="text" id="editProfileHost" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="editProfileUsername">Username</label>
+                                <input type="text" id="editProfileUsername" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editProfilePort">Port</label>
+                                <input type="number" id="editProfilePort" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editProfilePassword">Password</label>
+                            <input type="password" id="editProfilePassword" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" id="cancelEdit">Cancel</button>
+                            <button type="submit" class="btn-primary">Update Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Command Modal -->
+    <div class="modal" id="commandModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="commandModalTitle">Add Command</h2>
+                <button class="btn-icon" id="closeCommandModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="form" id="commandForm">
+                    <input type="hidden" id="commandMode" value="add">
+                    <input type="hidden" id="oldCommandTitle" value="">
+                    <div class="form-group">
+                        <label for="commandTitle">Command Title</label>
+                        <input type="text" id="commandTitle" placeholder="e.g., Restart Apache" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="commandText">Command</label>
+                        <textarea id="commandText" rows="3" placeholder="e.g., systemctl restart apache2" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="commandProfile">Profile</label>
+                        <select id="commandProfile" required>
+                            <option value="">Select a profile</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="commandUrl">URL (Optional)</label>
+                        <input type="url" id="commandUrl" placeholder="https://example.com">
+                    </div>
+                    <button type="submit" class="btn-primary" id="commandSubmitBtn">
+                        <i class="fas fa-plus"></i>
+                        Add Command
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/data/js/all.min.js"></script>
+    <script src="/data/js/Sortable.min.js"></script>
+    <script src="/scripts/app.js"></script>
+</body>
+</html>

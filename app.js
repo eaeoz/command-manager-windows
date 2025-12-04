@@ -108,6 +108,21 @@ function updateCommandsForProfileChange(oldTitle, newTitle) {
 
 // Routes
 expressApp.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+
+// API endpoint for commands
+expressApp.get('/api/commands', (req, res) => {
+    const commands = loadCommands();
+    res.json(commands);
+});
+
+// Serve static files
+expressApp.use('/styles', express.static(path.join(__dirname, 'public', 'styles')));
+expressApp.use('/scripts', express.static(path.join(__dirname, 'public', 'scripts')));
+
+// Legacy route (keeping for backward compatibility but not used in new UI)
+expressApp.get('/legacy', (req, res) => {
     const commands = loadCommands();
     const profiles = loadProfiles();
     res.send(`

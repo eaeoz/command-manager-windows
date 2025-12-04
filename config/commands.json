@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "lineNumber": 1,
+    "title": "test",
+    "command": "ping google.com",
+    "url": "https://google.com",
+    "profile": "Profile 1"
+  }
+]
