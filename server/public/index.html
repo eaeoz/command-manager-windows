@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Manager - User Dashboard</title>
+    <link rel="stylesheet" href="user.css">
+</head>
+<body>
+    <div class="app" id="app">
+        <!-- Login/Register Screen -->
+        <div class="auth-screen" id="authScreen">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <h1>⚡ Command Manager</h1>
+                    <p>Manage your SSH commands and profiles</p>
+                </div>
+
+                <!-- Login Form -->
+                <div class="auth-form" id="loginContainer">
+                    <h2>Sign In</h2>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">Email</label>
+                            <input type="email" id="loginEmail" required placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" required placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span>Sign In</span>
+                        </button>
+                        <div class="error-message" id="loginError"></div>
+                    </form>
+                    <p class="auth-switch">
+                        Don't have an account? 
+                        <a href="#" onclick="showRegister(); return false;">Create one</a>
+                    </p>
+                </div>
+
+                <!-- Register Form -->
+                <div class="auth-form" id="registerContainer" style="display: none;">
+                    <h2>Create Account</h2>
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="registerUsername">Username</label>
+                            <input type="text" id="registerUsername" required placeholder="johndoe" minlength="3">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">Email</label>
+                            <input type="email" id="registerEmail" required placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Password</label>
+                            <input type="password" id="registerPassword" required placeholder="••••••••" minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPasswordConfirm">Confirm Password</label>
+                            <input type="password" id="registerPasswordConfirm" required placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span>Create Account</span>
+                        </button>
+                        <div class="error-message" id="registerError"></div>
+                    </form>
+                    <p class="auth-switch">
+                        Already have an account? 
+                        <a href="#" onclick="showLogin(); return false;">Sign in</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard" id="dashboard" style="display: none;">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h2>⚡ Command Manager</h2>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="#" class="nav-item active" data-page="overview">
+                        <span class="icon">📊</span>
+                        <span>Overview</span>
+                    </a>
+                    <a href="#" class="nav-item" data-page="profiles">
+                        <span class="icon">💾</span>
+                        <span>My Profiles</span>
+                    </a>
+                    <a href="#" class="nav-item" data-page="commands">
+                        <span class="icon">⌨️</span>
+                        <span>My Commands</span>
+                    </a>
+                    <a href="#" class="nav-item" data-page="sync">
+                        <span class="icon">🔄</span>
+                        <span>Sync</span>
+                    </a>
+                    <a href="#" class="nav-item" data-page="profile">
+                        <span class="icon">👤</span>
+                        <span>My Account</span>
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <div class="theme-toggle">
+                        <button id="themeToggle" class="theme-btn">
+                            <span class="icon">🌙</span>
+                            <span>Dark Mode</span>
+                        </button>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name" id="currentUser"></span>
+                        <span class="user-email" id="currentUserEmail"></span>
+                        <button id="logoutBtn" class="btn-logout">Logout</button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <header class="top-bar">
+                    <h1 id="pageTitle">Overview</h1>
+                    <div class="top-bar-actions">
+                        <button class="btn btn-refresh" id="refreshBtn">🔄 Refresh</button>
+                    </div>
+                </header>
+
+                <!-- Overview Page -->
+                <div class="page active" id="overviewPage">
+                    <div class="welcome-card">
+                        <h2>Welcome back, <span id="welcomeUser"></span>!</h2>
+                        <p>Manage your SSH profiles and commands from anywhere</p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">💾</div>
+                            <div class="stat-info">
+                                <h3>My Profiles</h3>
+                                <p class="stat-value" id="profileCount">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⌨️</div>
+                            <div class="stat-info">
+                                <h3>My Commands</h3>
+                                <p class="stat-value" id="commandCount">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🔄</div>
+                            <div class="stat-info">
+                                <h3>Last Synced</h3>
+                                <p class="stat-value stat-time" id="lastSync">Never</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <h3>Quick Actions</h3>
+                        <div class="action-buttons">
+                            <button class="action-btn" onclick="switchPage('profiles')">
+                                <span class="icon">💾</span>
+                                <span>Add Profile</span>
+                            </button>
+                            <button class="action-btn" onclick="switchPage('commands')">
+                                <span class="icon">⌨️</span>
+                                <span>Add Command</span>
+                            </button>
+                            <button class="action-btn" onclick="switchPage('sync')">
+                                <span class="icon">🔄</span>
+                                <span>Sync Now</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profiles Page -->
+                <div class="page" id="profilesPage">
+                    <div class="page-header">
+                        <h2>My Profiles</h2>
+                        <button class="btn btn-primary" onclick="showAddProfileModal()">+ Add Profile</button>
+                    </div>
+                    <div class="profiles-grid" id="profilesGrid">
+                        <p class="loading">Loading profiles...</p>
+                    </div>
+                </div>
+
+                <!-- Commands Page -->
+                <div class="page" id="commandsPage">
+                    <div class="page-header">
+                        <h2>My Commands</h2>
+                        <button class="btn btn-primary" onclick="showAddCommandModal()">+ Add Command</button>
+                    </div>
+                    <div class="commands-list" id="commandsList">
+                        <p class="loading">Loading commands...</p>
+                    </div>
+                </div>
+
+                <!-- Profile Page -->
+                <div class="page" id="profilePage">
+                    <div class="profile-settings-container">
+                        <h2>Account Settings</h2>
+                        <p>Manage your personal information and security</p>
+                        
+                        <div class="settings-section">
+                            <h3>Personal Information</h3>
+                            <form id="updateProfileForm">
+                                <div class="form-group">
+                                    <label for="profileFormUsername">Username</label>
+                                    <input type="text" id="profileFormUsername" required minlength="3">
+                                </div>
+                                <div class="form-group">
+                                    <label for="profileFormEmail">Email</label>
+                                    <input type="email" id="profileFormEmail" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Update Profile</button>
+                            </form>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Change Password</h3>
+                            <form id="changePasswordForm">
+                                <div class="form-group">
+                                    <label for="currentPassword">Current Password</label>
+                                    <input type="password" id="currentPassword" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newPassword">New Password</label>
+                                    <input type="password" id="newPassword" required minlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmNewPassword">Confirm New Password</label>
+                                    <input type="password" id="confirmNewPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Change Password</button>
+                            </form>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Account Information</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>Account Status</label>
+                                    <span class="badge badge-success">Active</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Account Type</label>
+                                    <span id="accountRole">User</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Member Since</label>
+                                    <span id="memberSince">Loading...</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Last Login</label>
+                                    <span id="lastLoginTime">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section danger-zone">
+                            <h3>Danger Zone</h3>
+                            <p>Permanent actions that cannot be undone</p>
+                            <button class="btn btn-danger" onclick="deleteAccount()">Delete Account</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sync Page -->
+                <div class="page" id="syncPage">
+                    <div class="sync-container">
+                        <h2>Synchronization</h2>
+                        <p>Keep your profiles and commands in sync across all devices</p>
+                        
+                        <div class="sync-stats">
+                            <div class="sync-stat">
+                                <h4>Local</h4>
+                                <p><span id="localProfiles">0</span> profiles</p>
+                                <p><span id="localCommands">0</span> commands</p>
+                            </div>
+                            <div class="sync-arrow">⇄</div>
+                            <div class="sync-stat">
+                                <h4>Remote</h4>
+                                <p><span id="remoteProfiles">0</span> profiles</p>
+                                <p><span id="remoteCommands">0</span> commands</p>
+                            </div>
+                        </div>
+
+                        <div class="sync-actions">
+                            <button class="btn btn-primary btn-large" id="syncNowBtn">
+                                🔄 Sync Now
+                            </button>
+                            <p class="sync-info" id="syncInfo">Last synced: <span id="lastSyncTime">Never</span></p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add Profile Modal -->
+    <div class="modal" id="addProfileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add SSH Profile</h3>
+                <button class="modal-close" onclick="closeModal('addProfileModal')">&times;</button>
+            </div>
+            <form id="addProfileForm">
+                <div class="form-group">
+                    <label for="profileTitle">Title</label>
+                    <input type="text" id="profileTitle" required placeholder="My Server">
+                </div>
+                <div class="form-group">
+                    <label for="profileHost">Host</label>
+                    <input type="text" id="profileHost" required placeholder="192.168.1.100">
+                </div>
+                <div class="form-group">
+                    <label for="profileUsername">Username</label>
+                    <input type="text" id="profileUsername" required placeholder="root">
+                </div>
+                <div class="form-group">
+                    <label for="profilePassword">Password</label>
+                    <input type="password" id="profilePassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="profilePort">Port</label>
+                    <input type="number" id="profilePort" value="22">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addProfileModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Command Modal -->
+    <div class="modal" id="addCommandModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Command</h3>
+                <button class="modal-close" onclick="closeModal('addCommandModal')">&times;</button>
+            </div>
+            <form id="addCommandForm">
+                <div class="form-group">
+                    <label for="commandTitle">Title</label>
+                    <input type="text" id="commandTitle" required placeholder="Restart Server">
+                </div>
+                <div class="form-group">
+                    <label for="commandText">Command</label>
+                    <textarea id="commandText" required placeholder="sudo systemctl restart nginx" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="commandProfile">Profile</label>
+                    <select id="commandProfile" required>
+                        <option value="">Select a profile</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="commandUrl">URL (Optional)</label>
+                    <input type="url" id="commandUrl" placeholder="https://example.com">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addCommandModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Command</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script src="user.js"></script>
+</body>
+</html>

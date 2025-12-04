@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Manager - Admin Panel</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="app" id="app">
+        <!-- Login Screen -->
+        <div class="login-screen" id="loginScreen">
+            <div class="login-container">
+                <div class="login-header">
+                    <h1>🔐 Admin Login</h1>
+                    <p>Command Manager Admin Panel</p>
+                </div>
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="admin@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="loginBtn">
+                        <span>Login</span>
+                    </button>
+                    <div class="error-message" id="loginError"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard" id="dashboard" style="display: none;">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h2>⚡ CM Admin</h2>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="#" class="nav-item active" data-page="overview">
+                        <span class="icon">📊</span>
+                        <span>Overview</span>
+                    </a>
+                    <a href="#" class="nav-item" data-page="users">
+                        <span class="icon">👥</span>
+                        <span>Users</span>
+                    </a>
+                    <a href="#" class="nav-item" data-page="configurations">
+                        <span class="icon">⚙️</span>
+                        <span>Configurations</span>
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <div class="theme-toggle">
+                        <button id="themeToggle" class="theme-btn">
+                            <span class="icon">🌙</span>
+                            <span>Dark Mode</span>
+                        </button>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name" id="currentUser"></span>
+                        <button id="logoutBtn" class="btn-logout">Logout</button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <header class="top-bar">
+                    <h1 id="pageTitle">Overview</h1>
+                    <div class="top-bar-actions">
+                        <button class="btn btn-refresh" id="refreshBtn">🔄 Refresh</button>
+                    </div>
+                </header>
+
+                <!-- Overview Page -->
+                <div class="page active" id="overviewPage">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-info">
+                                <h3>Total Users</h3>
+                                <p class="stat-value" id="totalUsers">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-info">
+                                <h3>Active Users</h3>
+                                <p class="stat-value" id="activeUsers">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">👑</div>
+                            <div class="stat-info">
+                                <h3>Admins</h3>
+                                <p class="stat-value" id="adminUsers">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💾</div>
+                            <div class="stat-info">
+                                <h3>Total Profiles</h3>
+                                <p class="stat-value" id="totalProfiles">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⌨️</div>
+                            <div class="stat-info">
+                                <h3>Total Commands</h3>
+                                <p class="stat-value" id="totalCommands">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <h2>Recent Activity</h2>
+                        <div class="activity-list" id="activityList">
+                            <p class="empty-state">No recent activity</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Page -->
+                <div class="page" id="usersPage">
+                    <div class="page-header">
+                        <h2>User Management</h2>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table" id="usersTable">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Last Login</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr>
+                                    <td colspan="6" class="loading">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Configurations Page -->
+                <div class="page" id="configurationsPage">
+                    <div class="page-header">
+                        <h2>Configuration Management</h2>
+                    </div>
+                    <div class="config-grid" id="configGrid">
+                        <p class="loading">Loading configurations...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal" id="editUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit User</h3>
+                <button class="modal-close" onclick="closeModal('editUserModal')">&times;</button>
+            </div>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label for="editUsername">Username</label>
+                    <input type="text" id="editUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email</label>
+                    <input type="email" id="editEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="editRole">Role</label>
+                    <select id="editRole">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="editIsActive">
+                        <span>Active Account</span>
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editUserModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Config Modal -->
+    <div class="modal" id="viewConfigModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Configuration Details</h3>
+                <button class="modal-close" onclick="closeModal('viewConfigModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="config-details" id="configDetails"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

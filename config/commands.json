@@ -1,6 +1,13 @@
 [
   {
     "lineNumber": 1,
+    "title": "test 2",
+    "command": "ping sedat.netlify.app",
+    "url": "https://apple.com",
+    "profile": "Profile 2"
+  },
+  {
+    "lineNumber": 2,
     "title": "test",
     "command": "ping google.com",
     "url": "https://google.com",
