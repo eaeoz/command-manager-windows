@@ -94,43 +94,55 @@
 
                 <!-- Overview Page -->
                 <div class="page active" id="overviewPage">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon">👥</div>
-                            <div class="stat-info">
-                                <h3>Total Users</h3>
-                                <p class="stat-value" id="totalUsers">0</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">✅</div>
-                            <div class="stat-info">
-                                <h3>Active Users</h3>
-                                <p class="stat-value" id="activeUsers">0</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">👑</div>
-                            <div class="stat-info">
-                                <h3>Admins</h3>
-                                <p class="stat-value" id="adminUsers">0</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">💾</div>
-                            <div class="stat-info">
-                                <h3>Total Profiles</h3>
-                                <p class="stat-value" id="totalProfiles">0</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">⌨️</div>
-                            <div class="stat-info">
-                                <h3>Total Commands</h3>
-                                <p class="stat-value" id="totalCommands">0</p>
-                            </div>
-                        </div>
-                    </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <h3>Total Users</h3>
+              <div class="stat-value" id="totalUsers">0</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+              <h3>Active Users</h3>
+              <div class="stat-value" id="activeUsers">0</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔑</div>
+            <div class="stat-info">
+              <h3>Admin Users</h3>
+              <div class="stat-value" id="adminUsers">0</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📁</div>
+            <div class="stat-info">
+              <h3>Total Profiles</h3>
+              <div class="stat-value" id="totalProfiles">0</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-info">
+              <h3>Total Commands</h3>
+              <div class="stat-value" id="totalCommands">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Users Charts -->
+        <div class="charts-grid">
+          <div class="chart-container">
+            <h2>🏆 Top 10 Users by Profiles</h2>
+            <div id="topProfilesChart" class="bar-chart"></div>
+          </div>
+          <div class="chart-container">
+            <h2>🏆 Top 10 Users by Commands</h2>
+            <div id="topCommandsChart" class="bar-chart"></div>
+          </div>
+        </div>
 
                     <div class="chart-container">
                         <h2>Recent Activity</h2>

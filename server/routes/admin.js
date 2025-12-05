@@ -220,9 +220,27 @@ router.get('/stats', async (req, res) => {
     const adminUsers = await User.countDocuments({ role: 'admin' });
     const totalConfigs = await Configuration.countDocuments();
 
-    const allConfigs = await Configuration.find();
+    const allConfigs = await Configuration.find().populate('userId', 'username');
     const totalProfiles = allConfigs.reduce((sum, config) => sum + config.profiles.length, 0);
     const totalCommands = allConfigs.reduce((sum, config) => sum + config.commands.length, 0);
+
+    // Get top 10 users by profile count
+    const topUsersByProfiles = allConfigs
+      .map(config => ({
+        username: config.userId?.username || 'Unknown',
+        count: config.profiles.length
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // Get top 10 users by command count
+    const topUsersByCommands = allConfigs
+      .map(config => ({
+        username: config.userId?.username || 'Unknown',
+        count: config.commands.length
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
 
     res.status(200).json({
       success: true,
@@ -236,6 +254,10 @@ router.get('/stats', async (req, res) => {
           total: totalConfigs,
           totalProfiles,
           totalCommands
+        },
+        topUsers: {
+          byProfiles: topUsersByProfiles,
+          byCommands: topUsersByCommands
         }
       }
     });

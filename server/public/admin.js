@@ -216,17 +216,53 @@ async function loadOverviewData() {
     const response = await fetchAPI('/admin/stats');
     
     if (response.success) {
-      const { users, configurations } = response.data;
+      const { users, configurations, topUsers } = response.data;
       
       document.getElementById('totalUsers').textContent = users.total;
       document.getElementById('activeUsers').textContent = users.active;
       document.getElementById('adminUsers').textContent = users.admins;
       document.getElementById('totalProfiles').textContent = configurations.totalProfiles;
       document.getElementById('totalCommands').textContent = configurations.totalCommands;
+      
+      // Render top users charts
+      renderBarChart('topProfilesChart', topUsers.byProfiles);
+      renderBarChart('topCommandsChart', topUsers.byCommands);
     }
   } catch (error) {
     showToast('Failed to load overview data', 'error');
   }
+}
+
+// Render Bar Chart
+function renderBarChart(containerId, data) {
+  const container = document.getElementById(containerId);
+  
+  if (!data || data.length === 0) {
+    container.innerHTML = '<p class="empty-state">No data available</p>';
+    return;
+  }
+  
+  // Find max value for scaling
+  const maxValue = Math.max(...data.map(item => item.count));
+  
+  // Generate chart HTML
+  const chartHtml = data.map((item, index) => {
+    const percentage = (item.count / maxValue) * 100;
+    const rank = index + 1;
+    
+    return `
+      <div class="bar-chart-item">
+        <div class="bar-chart-label" title="${escapeHtml(item.username)}">${rank}. ${escapeHtml(item.username)}</div>
+        <div class="bar-chart-bar-container">
+          <div class="bar-chart-bar" style="width: ${percentage}%">
+            <span class="bar-chart-value">${item.count}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  container.innerHTML = chartHtml;
 }
 
 // Users Page
