@@ -444,6 +444,9 @@ async function viewConfiguration(configId) {
       const config = response.data.find(c => c._id === configId);
       
       if (config) {
+        // Store current config in window for edit/delete functions
+        window.currentViewedConfig = config;
+        
         const detailsHtml = `
           <div style="margin-bottom: 24px;">
             <h4 style="margin-bottom: 12px;">User: ${escapeHtml(config.userId.username)}</h4>
@@ -453,13 +456,19 @@ async function viewConfiguration(configId) {
           <div style="margin-bottom: 24px;">
             <h4 style="margin-bottom: 12px;">Profiles (${config.profiles.length})</h4>
             ${config.profiles.length > 0 ? `
-              <div style="max-height: 200px; overflow-y: auto;">
-                ${config.profiles.map(p => `
-                  <div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px;">
-                    <strong>${escapeHtml(p.title)}</strong><br>
-                    <span style="font-size: 12px; color: var(--text-secondary);">
-                      ${escapeHtml(p.username)}@${escapeHtml(p.host)}:${p.port}
-                    </span>
+              <div style="max-height: 300px; overflow-y: auto;">
+                ${config.profiles.map((p, index) => `
+                  <div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: start;">
+                    <div style="flex: 1;">
+                      <strong>${escapeHtml(p.title)}</strong><br>
+                      <span style="font-size: 12px; color: var(--text-secondary);">
+                        ${escapeHtml(p.username)}@${escapeHtml(p.host)}:${p.port}
+                      </span>
+                    </div>
+                    <div style="display: flex; gap: 4px; margin-left: 12px;">
+                      <button class="btn btn-small btn-secondary" onclick="editConfigProfile(${index})" title="Edit Profile">✏️</button>
+                      <button class="btn btn-small btn-danger" onclick="deleteConfigProfile(${index})" title="Delete Profile">🗑️</button>
+                    </div>
                   </div>
                 `).join('')}
               </div>
@@ -469,12 +478,19 @@ async function viewConfiguration(configId) {
           <div>
             <h4 style="margin-bottom: 12px;">Commands (${config.commands.length})</h4>
             ${config.commands.length > 0 ? `
-              <div style="max-height: 200px; overflow-y: auto;">
-                ${config.commands.map(c => `
-                  <div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px;">
-                    <strong>${escapeHtml(c.title)}</strong><br>
-                    <code style="font-size: 12px; color: var(--text-secondary);">${escapeHtml(c.command)}</code><br>
-                    <span style="font-size: 12px; color: var(--text-secondary);">Profile: ${escapeHtml(c.profile)}</span>
+              <div style="max-height: 300px; overflow-y: auto;">
+                ${config.commands.map((c, index) => `
+                  <div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: start;">
+                    <div style="flex: 1;">
+                      <strong>${escapeHtml(c.title)}</strong><br>
+                      <code style="font-size: 12px; color: var(--text-secondary); word-break: break-all;">${escapeHtml(c.command)}</code><br>
+                      <span style="font-size: 12px; color: var(--text-secondary);">Profile: ${escapeHtml(c.profile)}</span>
+                      ${c.url ? `<br><span style="font-size: 12px; color: var(--primary);">URL: ${escapeHtml(c.url)}</span>` : ''}
+                    </div>
+                    <div style="display: flex; gap: 4px; margin-left: 12px;">
+                      <button class="btn btn-small btn-secondary" onclick="editConfigCommand(${index})" title="Edit Command">✏️</button>
+                      <button class="btn btn-small btn-danger" onclick="deleteConfigCommand(${index})" title="Delete Command">🗑️</button>
+                    </div>
                   </div>
                 `).join('')}
               </div>
@@ -488,6 +504,124 @@ async function viewConfiguration(configId) {
     }
   } catch (error) {
     showToast('Failed to load configuration details', 'error');
+  }
+}
+
+// Edit profile in configuration
+function editConfigProfile(index) {
+  const config = window.currentViewedConfig;
+  const profile = config.profiles[index];
+  
+  const newTitle = prompt('Profile Title:', profile.title);
+  if (newTitle === null) return;
+  
+  const newHost = prompt('Host:', profile.host);
+  if (newHost === null) return;
+  
+  const newUsername = prompt('Username:', profile.username);
+  if (newUsername === null) return;
+  
+  const newPassword = prompt('Password:', profile.password);
+  if (newPassword === null) return;
+  
+  const newPort = prompt('Port:', profile.port);
+  if (newPort === null) return;
+  
+  // Update profile
+  config.profiles[index] = {
+    title: newTitle,
+    host: newHost,
+    username: newUsername,
+    password: newPassword,
+    port: parseInt(newPort)
+  };
+  
+  // Save to server
+  saveUserConfiguration(config);
+}
+
+// Delete profile from configuration
+async function deleteConfigProfile(index) {
+  const config = window.currentViewedConfig;
+  const profile = config.profiles[index];
+  
+  if (!confirm(`Are you sure you want to delete profile "${profile.title}"?`)) {
+    return;
+  }
+  
+  // Remove profile
+  config.profiles.splice(index, 1);
+  
+  // Save to server
+  await saveUserConfiguration(config);
+}
+
+// Edit command in configuration
+function editConfigCommand(index) {
+  const config = window.currentViewedConfig;
+  const command = config.commands[index];
+  
+  const newTitle = prompt('Command Title:', command.title);
+  if (newTitle === null) return;
+  
+  const newCommand = prompt('Command:', command.command);
+  if (newCommand === null) return;
+  
+  const newProfile = prompt('Profile:', command.profile);
+  if (newProfile === null) return;
+  
+  const newUrl = prompt('URL (optional):', command.url || '');
+  if (newUrl === null) return;
+  
+  // Update command
+  config.commands[index] = {
+    lineNumber: command.lineNumber,
+    title: newTitle,
+    command: newCommand,
+    profile: newProfile,
+    url: newUrl
+  };
+  
+  // Save to server
+  saveUserConfiguration(config);
+}
+
+// Delete command from configuration
+async function deleteConfigCommand(index) {
+  const config = window.currentViewedConfig;
+  const command = config.commands[index];
+  
+  if (!confirm(`Are you sure you want to delete command "${command.title}"?`)) {
+    return;
+  }
+  
+  // Remove command
+  config.commands.splice(index, 1);
+  
+  // Save to server
+  await saveUserConfiguration(config);
+}
+
+// Save user configuration
+async function saveUserConfiguration(config) {
+  try {
+    const response = await fetchAPI(`/admin/configurations/${config._id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        profiles: config.profiles,
+        commands: config.commands
+      })
+    });
+    
+    if (response.success) {
+      showToast('Configuration updated successfully', 'success');
+      // Refresh the view
+      await viewConfiguration(config._id);
+      // Reload configurations list
+      await loadConfigurationsData();
+    }
+  } catch (error) {
+    showToast(error.message || 'Failed to update configuration', 'error');
   }
 }
 

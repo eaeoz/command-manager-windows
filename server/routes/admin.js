@@ -173,14 +173,14 @@ router.get('/configurations', async (req, res) => {
   }
 });
 
-// @route   PUT /api/admin/configurations/:userId
-// @desc    Update user's configuration
+// @route   PUT /api/admin/configurations/:id
+// @desc    Update user's configuration by configuration ID
 // @access  Admin only
-router.put('/configurations/:userId', async (req, res) => {
+router.put('/configurations/:id', async (req, res) => {
   try {
     const { profiles, commands } = req.body;
     
-    let config = await Configuration.findOne({ userId: req.params.userId });
+    let config = await Configuration.findById(req.params.id);
     
     if (!config) {
       return res.status(404).json({
@@ -189,8 +189,9 @@ router.put('/configurations/:userId', async (req, res) => {
       });
     }
 
-    if (profiles) config.profiles = profiles;
-    if (commands) config.commands = commands;
+    if (profiles !== undefined) config.profiles = profiles;
+    if (commands !== undefined) config.commands = commands;
+    config.lastSyncedAt = new Date();
     
     await config.save();
 
