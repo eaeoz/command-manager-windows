@@ -561,7 +561,6 @@ async function loadSettingsData() {
       // Site Information
       document.getElementById('siteName').value = settings.siteName || '';
       document.getElementById('siteDescription').value = settings.siteDescription || '';
-      document.getElementById('siteUrl').value = settings.siteUrl || '';
       
       // SEO Settings
       document.getElementById('seoTitle').value = settings.seoTitle || '';
@@ -573,10 +572,6 @@ async function loadSettingsData() {
       document.getElementById('twitterUrl').value = settings.twitterUrl || '';
       document.getElementById('linkedinUrl').value = settings.linkedinUrl || '';
       document.getElementById('githubUrl').value = settings.githubUrl || '';
-      
-      // Contact Information
-      document.getElementById('contactEmail').value = settings.contactEmail || '';
-      document.getElementById('supportEmail').value = settings.supportEmail || '';
       
       // System Settings
       document.getElementById('maintenanceMode').checked = settings.maintenanceMode || false;
@@ -593,7 +588,6 @@ async function saveSettings() {
       // Site Information
       siteName: document.getElementById('siteName').value,
       siteDescription: document.getElementById('siteDescription').value,
-      siteUrl: document.getElementById('siteUrl').value,
       
       // SEO Settings
       seoTitle: document.getElementById('seoTitle').value,
@@ -605,10 +599,6 @@ async function saveSettings() {
       twitterUrl: document.getElementById('twitterUrl').value,
       linkedinUrl: document.getElementById('linkedinUrl').value,
       githubUrl: document.getElementById('githubUrl').value,
-      
-      // Contact Information
-      contactEmail: document.getElementById('contactEmail').value,
-      supportEmail: document.getElementById('supportEmail').value,
       
       // System Settings
       maintenanceMode: document.getElementById('maintenanceMode').checked,

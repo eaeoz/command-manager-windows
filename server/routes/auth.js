@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const Configuration = require('../models/Configuration');
+const Settings = require('../models/Settings');
 const { sendTokenResponse, auth } = require('../middleware/auth');
 const { authLimiter, registerLimiter } = require('../middleware/rateLimiter');
 require('dotenv').config();
@@ -149,6 +150,15 @@ router.post('/register',
         return res.status(400).json({
           success: false,
           errors: errors.array()
+        });
+      }
+
+      // Check if registration is allowed
+      const settings = await Settings.getSettings();
+      if (!settings.allowRegistration) {
+        return res.status(403).json({
+          success: false,
+          message: 'New user registrations are currently disabled. Please contact the administrator.'
         });
       }
 

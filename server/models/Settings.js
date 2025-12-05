@@ -10,10 +10,6 @@ const settingsSchema = new mongoose.Schema({
     type: String,
     default: 'Manage your SSH commands and profiles from anywhere'
   },
-  siteUrl: {
-    type: String,
-    default: 'http://localhost:5000'
-  },
   
   // SEO
   seoTitle: {
@@ -47,17 +43,7 @@ const settingsSchema = new mongoose.Schema({
     default: ''
   },
   
-  // Contact Information
-  contactEmail: {
-    type: String,
-    default: 'contact@commandmanager.com'
-  },
-  supportEmail: {
-    type: String,
-    default: 'support@commandmanager.com'
-  },
-  
-  // Additional Settings
+  // System Settings
   maintenanceMode: {
     type: Boolean,
     default: false

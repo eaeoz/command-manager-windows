@@ -10,10 +10,53 @@ let userConfig = { profiles: [], commands: [] };
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
   initializeTheme();
+  checkSettings(); // Check site settings first
   checkEmailVerification(); // Check for email verification token
   checkAuth();
   setupEventListeners();
 });
+
+// Check site settings (maintenance mode and registration)
+async function checkSettings() {
+  try {
+    const response = await fetch(`${API_URL}/settings`);
+    const data = await response.json();
+    
+    if (data.success) {
+      const settings = data.data;
+      
+      // Check maintenance mode
+      if (settings.maintenanceMode) {
+        // Show maintenance page
+        document.getElementById('authScreen').innerHTML = `
+          <div class="auth-container">
+            <div class="auth-header" style="text-align: center;">
+              <h1 style="font-size: 3rem; margin-bottom: 1rem;">🔧</h1>
+              <h1>Site Under Maintenance</h1>
+              <p style="margin-top: 1rem;">We're currently performing scheduled maintenance.</p>
+              <p style="margin-top: 0.5rem;">Please check back soon!</p>
+            </div>
+          </div>
+        `;
+        // Don't proceed with normal initialization
+        return;
+      }
+      
+      // Hide/show registration section based on setting
+      if (settings.allowRegistration === false) {
+        // Hide only the specific registration prompt paragraph
+        // Contact link is now in a separate paragraph and stays visible
+        const registerPrompt = document.getElementById('registerPrompt');
+        if (registerPrompt) {
+          registerPrompt.style.display = 'none';
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load settings:', error);
+    // Continue with normal flow if settings check fails
+  }
+}
 
 // Check for email verification token in URL
 async function checkEmailVerification() {

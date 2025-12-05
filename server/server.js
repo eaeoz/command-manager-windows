@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 
 const { apiLimiter } = require('./middleware/rateLimiter');
+const { checkMaintenanceMode } = require('./middleware/maintenance');
 
 const app = express();
 
@@ -90,6 +91,9 @@ app.use(cookieParser());
 
 // Rate limiting
 app.use('/api', apiLimiter);
+
+// Maintenance mode check (applies to all routes except admin)
+app.use(checkMaintenanceMode);
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));

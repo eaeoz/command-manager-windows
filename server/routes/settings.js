@@ -32,7 +32,6 @@ router.put('/', protect, authorize('admin'), async (req, res) => {
     const {
       siteName,
       siteDescription,
-      siteUrl,
       seoTitle,
       seoDescription,
       seoKeywords,
@@ -40,8 +39,6 @@ router.put('/', protect, authorize('admin'), async (req, res) => {
       twitterUrl,
       linkedinUrl,
       githubUrl,
-      contactEmail,
-      supportEmail,
       maintenanceMode,
       allowRegistration
     } = req.body;
@@ -51,7 +48,6 @@ router.put('/', protect, authorize('admin'), async (req, res) => {
     // Update fields
     if (siteName !== undefined) settings.siteName = siteName;
     if (siteDescription !== undefined) settings.siteDescription = siteDescription;
-    if (siteUrl !== undefined) settings.siteUrl = siteUrl;
     if (seoTitle !== undefined) settings.seoTitle = seoTitle;
     if (seoDescription !== undefined) settings.seoDescription = seoDescription;
     if (seoKeywords !== undefined) settings.seoKeywords = seoKeywords;
@@ -59,8 +55,6 @@ router.put('/', protect, authorize('admin'), async (req, res) => {
     if (twitterUrl !== undefined) settings.twitterUrl = twitterUrl;
     if (linkedinUrl !== undefined) settings.linkedinUrl = linkedinUrl;
     if (githubUrl !== undefined) settings.githubUrl = githubUrl;
-    if (contactEmail !== undefined) settings.contactEmail = contactEmail;
-    if (supportEmail !== undefined) settings.supportEmail = supportEmail;
     if (maintenanceMode !== undefined) settings.maintenanceMode = maintenanceMode;
     if (allowRegistration !== undefined) settings.allowRegistration = allowRegistration;
     
