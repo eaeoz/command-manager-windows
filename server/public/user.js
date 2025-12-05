@@ -383,6 +383,7 @@ async function loadProfilesData() {
     if (response.success) {
       userConfig = response.data;
       renderProfiles(response.data.profiles);
+      setupProfileSearch();
     }
   } catch (error) {
     showToast('Failed to load profiles', 'error');
@@ -405,7 +406,7 @@ function renderProfiles(profiles) {
   }
   
   grid.innerHTML = profiles.map((profile, index) => `
-    <div class="profile-card">
+    <div class="profile-card" data-profile-title="${escapeHtml(profile.title).toLowerCase()}" data-profile-host="${escapeHtml(profile.host).toLowerCase()}" data-profile-username="${escapeHtml(profile.username).toLowerCase()}">
       <div class="profile-card-header">
         <div>
           <div class="profile-card-title">${escapeHtml(profile.title)}</div>
@@ -418,6 +419,53 @@ function renderProfiles(profiles) {
       </div>
     </div>
   `).join('');
+}
+
+function setupProfileSearch() {
+  const searchInput = document.getElementById('profileSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase().trim();
+      const profileCards = document.querySelectorAll('.profile-card');
+      
+      let visibleCount = 0;
+      profileCards.forEach(card => {
+        const title = card.dataset.profileTitle || '';
+        const host = card.dataset.profileHost || '';
+        const username = card.dataset.profileUsername || '';
+        
+        const matches = title.includes(searchTerm) || 
+                       host.includes(searchTerm) || 
+                       username.includes(searchTerm);
+        
+        if (matches) {
+          card.style.display = '';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      
+      // Show "no results" message if needed
+      const grid = document.getElementById('profilesGrid');
+      let noResults = grid.querySelector('.no-results');
+      
+      if (visibleCount === 0 && searchTerm) {
+        if (!noResults) {
+          noResults = document.createElement('div');
+          noResults.className = 'empty-state-card no-results';
+          noResults.innerHTML = `
+            <div class="icon">🔍</div>
+            <h3>No profiles found</h3>
+            <p>Try adjusting your search terms</p>
+          `;
+          grid.appendChild(noResults);
+        }
+      } else if (noResults) {
+        noResults.remove();
+      }
+    });
+  }
 }
 
 function showAddProfileModal() {
@@ -479,6 +527,7 @@ async function loadCommandsData() {
       userConfig = response.data;
       renderCommands(response.data.commands);
       updateCommandProfileSelect(response.data.profiles);
+      setupCommandSearch();
     }
   } catch (error) {
     showToast('Failed to load commands', 'error');
@@ -501,7 +550,7 @@ function renderCommands(commands) {
   }
   
   list.innerHTML = commands.map((cmd, index) => `
-    <div class="command-card">
+    <div class="command-card" data-command-title="${escapeHtml(cmd.title).toLowerCase()}" data-command-text="${escapeHtml(cmd.command).toLowerCase()}" data-command-profile="${escapeHtml(cmd.profile).toLowerCase()}">
       <div class="command-card-header">
         <div class="command-card-title">${escapeHtml(cmd.title)}</div>
       </div>
@@ -516,6 +565,69 @@ function renderCommands(commands) {
       </div>
     </div>
   `).join('');
+}
+
+function setupCommandSearch() {
+  const searchInput = document.getElementById('commandSearch');
+  if (!searchInput) {
+    console.error('Command search input not found!');
+    return;
+  }
+  
+  // Remove any existing listeners
+  const newInput = searchInput.cloneNode(true);
+  searchInput.parentNode.replaceChild(newInput, searchInput);
+  
+  newInput.addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase().trim();
+    const commandCards = document.querySelectorAll('.command-card:not(.empty-state-card)');
+    
+    console.log('Command search term:', searchTerm);
+    console.log('Found command cards:', commandCards.length);
+    
+    let visibleCount = 0;
+    commandCards.forEach(card => {
+      const title = card.dataset.commandTitle || '';
+      const commandText = card.dataset.commandText || '';
+      const profile = card.dataset.commandProfile || '';
+      
+      console.log('Checking card:', { title, commandText, profile });
+      
+      const matches = title.includes(searchTerm) || 
+                     commandText.includes(searchTerm) || 
+                     profile.includes(searchTerm);
+      
+      if (matches || searchTerm === '') {
+        card.style.display = '';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    
+    console.log('Visible count:', visibleCount);
+    
+    // Show "no results" message if needed
+    const list = document.getElementById('commandsList');
+    let noResults = list.querySelector('.no-results');
+    
+    if (visibleCount === 0 && searchTerm) {
+      if (!noResults) {
+        noResults = document.createElement('div');
+        noResults.className = 'empty-state-card no-results';
+        noResults.innerHTML = `
+          <div class="icon">🔍</div>
+          <h3>No commands found</h3>
+          <p>Try adjusting your search terms</p>
+        `;
+        list.appendChild(noResults);
+      }
+    } else if (noResults) {
+      noResults.remove();
+    }
+  });
+  
+  console.log('Command search listener attached successfully');
 }
 
 function updateCommandProfileSelect(profiles) {
