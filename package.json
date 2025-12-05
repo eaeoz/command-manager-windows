@@ -29,6 +29,7 @@
     "express": "^4.21.0",
     "font-awesome": "^4.7.0",
     "fs": "^0.0.1-security",
+    "multer": "^2.0.2",
     "ssh2": "^1.16.0"
   },
   "devDependencies": {

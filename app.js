@@ -1625,6 +1625,83 @@ expressApp.post('/commands/sync', (req, res) => {
     res.json({ success: true });
 });
 
+// Backup/Restore endpoints
+const multer = require('multer');
+const upload = multer({ dest: path.join(__dirname, 'temp') });
+
+// Create backup - pack all JSON files into a single .bin file
+expressApp.get('/backup/create', (req, res) => {
+    try {
+        const configFolder = path.join(__dirname, 'config');
+        const backupData = {
+            profiles: loadProfiles(),
+            commands: loadCommands(),
+            timestamp: new Date().toISOString()
+        };
+        
+        // Convert to binary buffer
+        const jsonString = JSON.stringify(backupData, null, 2);
+        const buffer = Buffer.from(jsonString, 'utf8');
+        
+        res.setHeader('Content-Type', 'application/octet-stream');
+        res.setHeader('Content-Disposition', `attachment; filename="backup-${Date.now()}.bin"`);
+        res.send(buffer);
+    } catch (error) {
+        console.error('Backup creation error:', error);
+        logError('Backup creation failed: ' + error.message);
+        res.status(500).json({ error: 'Failed to create backup' });
+    }
+});
+
+// Restore from backup - extract and restore JSON files
+expressApp.post('/backup/restore', upload.single('backup'), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No backup file provided' });
+        }
+        
+        // Read the backup file
+        const backupPath = req.file.path;
+        const buffer = fs.readFileSync(backupPath);
+        const jsonString = buffer.toString('utf8');
+        const backupData = JSON.parse(jsonString);
+        
+        // Validate backup data
+        if (!backupData.profiles || !backupData.commands) {
+            fs.unlinkSync(backupPath); // Clean up temp file
+            return res.status(400).json({ error: 'Invalid backup file format' });
+        }
+        
+        // Restore profiles and commands
+        saveProfiles(backupData.profiles);
+        saveCommands(backupData.commands);
+        
+        // Clean up temp file
+        fs.unlinkSync(backupPath);
+        
+        res.json({ 
+            success: true, 
+            message: 'Backup restored successfully',
+            profileCount: backupData.profiles.length,
+            commandCount: backupData.commands.length
+        });
+    } catch (error) {
+        console.error('Backup restore error:', error);
+        logError('Backup restore failed: ' + error.message);
+        
+        // Clean up temp file if it exists
+        if (req.file && req.file.path) {
+            try {
+                fs.unlinkSync(req.file.path);
+            } catch (e) {
+                console.error('Failed to clean up temp file:', e);
+            }
+        }
+        
+        res.status(500).json({ error: 'Failed to restore backup: ' + error.message });
+    }
+});
+
 
 
 // Start the Express server

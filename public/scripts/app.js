@@ -91,6 +91,13 @@ function setupEventListeners() {
     document.getElementById('syncPushBtn').addEventListener('click', handleSyncPush);
     document.getElementById('syncPullBtn').addEventListener('click', handleSyncPull);
     document.getElementById('syncLogoutBtn').addEventListener('click', handleSyncLogout);
+    
+    // Backup/Restore functions
+    document.getElementById('backupBtn').addEventListener('click', handleBackup);
+    document.getElementById('restoreBtn').addEventListener('click', () => {
+        document.getElementById('restoreFileInput').click();
+    });
+    document.getElementById('restoreFileInput').addEventListener('change', handleRestore);
 }
 
 // Modal Functions
@@ -1088,6 +1095,89 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
+
+// Backup/Restore Functions
+async function handleBackup() {
+    const backupBtn = document.getElementById('backupBtn');
+    backupBtn.disabled = true;
+    backupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Backup...';
+    
+    try {
+        const response = await fetch('/backup/create');
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `command-manager-backup-${new Date().getTime()}.bin`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            showNotification('Backup created successfully!', 'success');
+        } else {
+            showNotification('Failed to create backup', 'error');
+        }
+    } catch (error) {
+        console.error('Backup error:', error);
+        showNotification('Failed to create backup', 'error');
+    } finally {
+        backupBtn.disabled = false;
+        backupBtn.innerHTML = '<i class="fas fa-download"></i> Create Backup (Save .bin file)';
+    }
+}
+
+async function handleRestore(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const confirmed = await ipcRenderer.invoke('show-confirmation', 
+        `This will REPLACE all current profiles and commands with the backup data. Continue?`);
+    
+    if (!confirmed) {
+        event.target.value = ''; // Reset file input
+        return;
+    }
+    
+    const restoreBtn = document.getElementById('restoreBtn');
+    restoreBtn.disabled = true;
+    restoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Restoring...';
+    
+    try {
+        const formData = new FormData();
+        formData.append('backup', file);
+        
+        const response = await fetch('/backup/restore', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            showNotification('Backup restored successfully!', 'success');
+            
+            // Reload data
+            await loadProfiles();
+            await loadCommands();
+            renderCommands();
+            updateStats();
+            loadProfilesList();
+            populateProfileSelect();
+        } else {
+            showNotification(data.error || 'Failed to restore backup', 'error');
+        }
+    } catch (error) {
+        console.error('Restore error:', error);
+        showNotification('Failed to restore backup', 'error');
+    } finally {
+        restoreBtn.disabled = false;
+        restoreBtn.innerHTML = '<i class="fas fa-upload"></i> Restore from Backup (Browse .bin file)';
+        event.target.value = ''; // Reset file input
+    }
+}
 
 // Make functions global for onclick handlers
 window.editCommand = editCommand;
