@@ -1048,7 +1048,19 @@ function copyConsoleOutput() {
     }
     
     navigator.clipboard.writeText(text).then(() => {
-        showNotification('Output copied to clipboard!', 'success');
+        // Create tooltip
+        const tooltip = document.createElement('div');
+        tooltip.className = 'copy-tooltip';
+        tooltip.innerHTML = '<i class="fas fa-check"></i> Copied to clipboard!';
+        
+        // Find the console header (relative position parent)
+        const consoleHeader = document.querySelector('.console-header');
+        consoleHeader.appendChild(tooltip);
+        
+        // Remove tooltip after animation completes (3 seconds total)
+        setTimeout(() => {
+            tooltip.remove();
+        }, 3000);
     }).catch(err => {
         console.error('Copy failed:', err);
         showNotification('Failed to copy output', 'error');
