@@ -570,13 +570,14 @@
 /* Page Header */
 .page-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: 24px;
 }
 
 .page-header h2 {
   font-size: 20px;
+  flex: 1;
 }
 
 /* Search Container */
