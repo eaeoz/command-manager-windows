@@ -95,6 +95,14 @@
                     <input type="text" id="searchInput" placeholder="Search commands...">
                 </div>
             </div>
+            <div class="card-size-control">
+                <label for="cardSizeSlider">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                    Card Size:
+                </label>
+                <input type="range" id="cardSizeSlider" min="80" max="150" value="100" step="5">
+                <span id="cardSizeValue">100%</span>
+            </div>
             <div class="commands-grid" id="commandsGrid">
                 <!-- Commands will be dynamically inserted here -->
             </div>

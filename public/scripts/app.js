@@ -98,6 +98,23 @@ function setupEventListeners() {
         document.getElementById('restoreFileInput').click();
     });
     document.getElementById('restoreFileInput').addEventListener('change', handleRestore);
+    
+    // Card size control slider
+    const cardSizeSlider = document.getElementById('cardSizeSlider');
+    const cardSizeValue = document.getElementById('cardSizeValue');
+    
+    // Load saved card size preference
+    const savedCardSize = localStorage.getItem('cardSize') || '100';
+    cardSizeSlider.value = savedCardSize;
+    cardSizeValue.textContent = savedCardSize + '%';
+    applyCardSize(savedCardSize);
+    
+    cardSizeSlider.addEventListener('input', (e) => {
+        const size = e.target.value;
+        cardSizeValue.textContent = size + '%';
+        applyCardSize(size);
+        localStorage.setItem('cardSize', size);
+    });
 }
 
 // Modal Functions
@@ -1272,6 +1289,60 @@ if (!document.getElementById('toastStyles')) {
         }
     `;
     document.head.appendChild(style);
+}
+
+// Card Size Adjustment Function
+function applyCardSize(size) {
+    const scale = size / 100;
+    const grid = document.getElementById('commandsGrid');
+    
+    // Apply scale to all command cards
+    const cards = grid.querySelectorAll('.command-card');
+    cards.forEach(card => {
+        // Scale padding
+        card.style.padding = `${1.5 * scale}rem`;
+        
+        // Scale title font size
+        const title = card.querySelector('.command-title');
+        if (title) {
+            title.style.fontSize = `${1 * scale}rem`;
+        }
+        
+        // Scale profile text
+        const profile = card.querySelector('.command-profile');
+        if (profile) {
+            profile.style.fontSize = `${0.75 * scale}rem`;
+        }
+        
+        // Scale command text
+        const commandText = card.querySelector('.command-text');
+        if (commandText) {
+            commandText.style.fontSize = `${0.875 * scale}rem`;
+            commandText.style.padding = `${0.75 * scale}rem`;
+        }
+        
+        // Scale buttons
+        const buttons = card.querySelectorAll('button');
+        buttons.forEach(btn => {
+            btn.style.fontSize = `${0.875 * scale}rem`;
+            if (btn.classList.contains('btn-run-full')) {
+                btn.style.padding = `${0.75 * scale}rem`;
+                btn.style.fontSize = `${0.9375 * scale}rem`;
+            } else if (btn.classList.contains('btn-icon')) {
+                btn.style.width = `${36 * scale}px`;
+                btn.style.height = `${36 * scale}px`;
+            }
+        });
+        
+        // Scale icons
+        const icons = card.querySelectorAll('i');
+        icons.forEach(icon => {
+            const currentSize = parseFloat(window.getComputedStyle(icon).fontSize);
+            if (currentSize) {
+                icon.style.fontSize = `${currentSize * scale}px`;
+            }
+        });
+    });
 }
 
 // Make functions global for onclick handlers
