@@ -46,12 +46,16 @@ function setupEventListeners() {
   // Logout
   document.getElementById('logoutBtn').addEventListener('click', handleLogout);
   
+  // Mobile menu
+  setupMobileMenu();
+  
   // Navigation
   document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
       const page = item.dataset.page;
       switchPage(page);
+      closeMobileMenu(); // Close menu after selecting a page
     });
   });
   
@@ -923,6 +927,75 @@ function addConfigCommand() {
   
   // Save to server
   saveUserConfiguration(config);
+}
+
+// Mobile Menu Functions
+function setupMobileMenu() {
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const sidebarClose = document.getElementById('sidebarClose');
+  const mobileOverlay = document.getElementById('mobileOverlay');
+  const sidebar = document.getElementById('sidebar');
+  
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+  }
+  
+  if (sidebarClose) {
+    sidebarClose.addEventListener('click', closeMobileMenu);
+  }
+  
+  if (mobileOverlay) {
+    mobileOverlay.addEventListener('click', closeMobileMenu);
+  }
+  
+  // Close menu on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sidebar && sidebar.classList.contains('open')) {
+      closeMobileMenu();
+    }
+  });
+}
+
+function toggleMobileMenu() {
+  const sidebar = document.getElementById('sidebar');
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const mobileOverlay = document.getElementById('mobileOverlay');
+  
+  if (sidebar && mobileMenuBtn && mobileOverlay) {
+    const isOpen = sidebar.classList.contains('open');
+    
+    if (isOpen) {
+      closeMobileMenu();
+    } else {
+      openMobileMenu();
+    }
+  }
+}
+
+function openMobileMenu() {
+  const sidebar = document.getElementById('sidebar');
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const mobileOverlay = document.getElementById('mobileOverlay');
+  
+  if (sidebar && mobileMenuBtn && mobileOverlay) {
+    sidebar.classList.add('open');
+    mobileMenuBtn.classList.add('active');
+    mobileOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevent body scroll when menu is open
+  }
+}
+
+function closeMobileMenu() {
+  const sidebar = document.getElementById('sidebar');
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const mobileOverlay = document.getElementById('mobileOverlay');
+  
+  if (sidebar && mobileMenuBtn && mobileOverlay) {
+    sidebar.classList.remove('open');
+    mobileMenuBtn.classList.remove('active');
+    mobileOverlay.classList.remove('active');
+    document.body.style.overflow = ''; // Restore body scroll
+  }
 }
 
 // Make functions global

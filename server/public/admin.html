@@ -35,10 +35,21 @@
 
         <!-- Dashboard -->
         <div class="dashboard" id="dashboard" style="display: none;">
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <!-- Mobile Overlay -->
+            <div class="mobile-overlay" id="mobileOverlay"></div>
+            
             <!-- Sidebar -->
-            <aside class="sidebar">
+            <aside class="sidebar" id="sidebar">
                 <div class="sidebar-header">
                     <h2>>_ CM Admin</h2>
+                    <button class="sidebar-close" id="sidebarClose" aria-label="Close Menu">&times;</button>
                 </div>
                 <nav class="sidebar-nav">
                     <a href="#" class="nav-item active" data-page="overview">
