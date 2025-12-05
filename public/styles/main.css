@@ -478,11 +478,25 @@ body {
     padding: 0;
     background: transparent;
     color: var(--text-secondary);
+    font-size: 0.875rem;
 }
 
 .btn-icon:hover {
     background: var(--bg-tertiary);
     color: var(--primary-color);
+}
+
+.command-actions .btn-icon:first-child {
+    width: 44px;
+    height: 44px;
+    font-size: 1.125rem;
+    background: var(--primary-color);
+    color: white;
+}
+
+.command-actions .btn-icon:first-child:hover {
+    background: var(--primary-hover);
+    transform: scale(1.05);
 }
 
 .btn-close:hover {
