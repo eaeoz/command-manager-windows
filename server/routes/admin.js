@@ -68,9 +68,9 @@ router.get('/users/:id', async (req, res) => {
 // @access  Admin only
 router.put('/users/:id', async (req, res) => {
   try {
-    const { username, email, role, isActive } = req.body;
+    const { username, email, role, isActive, isEmailVerified, password } = req.body;
     
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select('+password');
     
     if (!user) {
       return res.status(404).json({
@@ -84,6 +84,12 @@ router.put('/users/:id', async (req, res) => {
     if (email) user.email = email;
     if (role) user.role = role;
     if (typeof isActive !== 'undefined') user.isActive = isActive;
+    if (typeof isEmailVerified !== 'undefined') user.isEmailVerified = isEmailVerified;
+    
+    // Update password if provided
+    if (password && password.trim() !== '') {
+      user.password = password;
+    }
 
     await user.save();
 

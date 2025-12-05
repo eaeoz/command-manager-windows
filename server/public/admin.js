@@ -226,7 +226,13 @@ function renderUsersTable(users) {
   tbody.innerHTML = users.map(user => `
     <tr>
       <td>${escapeHtml(user.username)}</td>
-      <td>${escapeHtml(user.email)}</td>
+      <td>
+        ${escapeHtml(user.email)}
+        <br>
+        <span style="font-size: 11px; color: ${user.isEmailVerified ? 'var(--success)' : 'var(--warning)'};">
+          ${user.isEmailVerified ? '✓ Verified' : '⚠ Not Verified'}
+        </span>
+      </td>
       <td><span class="role-badge role-${user.role}">${user.role}</span></td>
       <td><span class="status-badge status-${user.isActive ? 'active' : 'inactive'}">${user.isActive ? 'Active' : 'Inactive'}</span></td>
       <td>${user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}</td>
@@ -250,6 +256,8 @@ async function editUser(userId) {
       document.getElementById('editEmail').value = user.email;
       document.getElementById('editRole').value = user.role;
       document.getElementById('editIsActive').checked = user.isActive;
+      document.getElementById('editIsEmailVerified').checked = user.isEmailVerified;
+      document.getElementById('editPassword').value = ''; // Clear password field
       
       openModal('editUserModal');
     }
@@ -262,12 +270,20 @@ async function handleUpdateUser(e) {
   e.preventDefault();
   
   const userId = document.getElementById('editUserId').value;
+  const password = document.getElementById('editPassword').value;
+  
   const userData = {
     username: document.getElementById('editUsername').value,
     email: document.getElementById('editEmail').value,
     role: document.getElementById('editRole').value,
-    isActive: document.getElementById('editIsActive').checked
+    isActive: document.getElementById('editIsActive').checked,
+    isEmailVerified: document.getElementById('editIsEmailVerified').checked
   };
+  
+  // Only include password if it's provided
+  if (password && password.trim() !== '') {
+    userData.password = password;
+  }
   
   try {
     const response = await fetchAPI(`/admin/users/${userId}`, {

@@ -193,6 +193,17 @@
                         <span>Active Account</span>
                     </label>
                 </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="editIsEmailVerified">
+                        <span>Email Verified</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="editPassword">New Password (leave blank to keep current)</label>
+                    <input type="password" id="editPassword" placeholder="••••••••" minlength="6">
+                    <small style="color: var(--text-secondary); font-size: 12px; margin-top: 4px; display: block;">Only fill this if you want to change the user's password</small>
+                </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('editUserModal')">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Changes</button>
