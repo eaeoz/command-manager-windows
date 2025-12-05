@@ -1117,8 +1117,11 @@ async function handleBackup() {
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
             
-            // Show nice toast notification instead of popup
-            showToastNotification('Backup Downloaded!', `File saved: ${filename}`, 'success');
+            // Wait a bit for save dialog to close and file to be saved
+            // Then show toast notification
+            setTimeout(() => {
+                showToastNotification('Backup Downloaded!', `File saved: ${filename}`, 'success');
+            }, 1000); // 1 second delay after download trigger
         } else {
             showToastNotification('Backup Failed', 'Failed to create backup file', 'error');
         }

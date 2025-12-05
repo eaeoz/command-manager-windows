@@ -9,11 +9,11 @@
   },
   {
     "lineNumber": 2,
-    "title": "test",
-    "command": "ping google.com",
+    "title": "Restart Server",
+    "command": "reboot",
     "profile": "Profile 1",
-    "url": "https://google.com",
-    "_id": "6932552da6e998cdd8179b47"
+    "url": "",
+    "_id": "6932552da6e998cdd8179b46"
   },
   {
     "lineNumber": 3,
