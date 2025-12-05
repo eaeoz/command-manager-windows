@@ -260,6 +260,14 @@ function handleLogout() {
   localStorage.removeItem('userCurrentUser');
   authToken = null;
   currentUser = null;
+  userConfig = { profiles: [], commands: [] };
+  
+  // Clear device list from UI
+  const devicesList = document.getElementById('devicesList');
+  if (devicesList) {
+    devicesList.innerHTML = '';
+  }
+  
   showAuth();
 }
 
@@ -275,7 +283,9 @@ function showDashboard() {
   document.getElementById('currentUserEmail').textContent = currentUser.email;
   document.getElementById('welcomeUser').textContent = currentUser.username;
   setupMobileMenuListeners();
-  loadPageData('overview');
+  
+  // Always start at overview page with statistics
+  switchPage('overview');
 }
 
 function showRegister() {

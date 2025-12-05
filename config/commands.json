@@ -1,25 +1,9 @@
 [
   {
-    "lineNumber": 2,
-    "title": "Restart Server",
-    "command": "reboot",
-    "profile": "Profile 1",
-    "url": "",
-    "_id": "6932552da6e998cdd8179b46"
-  },
-  {
-    "lineNumber": 2,
-    "title": "Restart Server",
-    "command": "reboot",
-    "profile": "Profile 1",
-    "url": "",
-    "_id": "6932552da6e998cdd8179b46"
-  },
-  {
-    "lineNumber": 3,
-    "title": "ping google",
-    "command": "ping -c 3  google.com",
-    "url": "https://www.google.com",
+    "lineNumber": 1,
+    "title": "ping gooogle",
+    "command": "ping -c 6 google.com",
+    "url": "https://google.com",
     "profile": "media"
   }
 ]
