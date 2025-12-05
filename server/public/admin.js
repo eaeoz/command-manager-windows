@@ -337,16 +337,64 @@ async function deleteUser(userId, username) {
 }
 
 // Configurations Page
+let allConfigurations = [];
+
 async function loadConfigurationsData() {
   try {
     const response = await fetchAPI('/admin/configurations');
     
     if (response.success) {
-      renderConfigurationsGrid(response.data);
+      allConfigurations = response.data;
+      renderConfigurationsGrid(allConfigurations);
+      setupConfigFilters();
     }
   } catch (error) {
     showToast('Failed to load configurations', 'error');
   }
+}
+
+function setupConfigFilters() {
+  const usernameInput = document.getElementById('searchUsername');
+  const profileInput = document.getElementById('searchProfile');
+  const commandInput = document.getElementById('searchCommand');
+  
+  // Remove existing listeners
+  usernameInput.replaceWith(usernameInput.cloneNode(true));
+  profileInput.replaceWith(profileInput.cloneNode(true));
+  commandInput.replaceWith(commandInput.cloneNode(true));
+  
+  // Re-get elements after cloning
+  const username = document.getElementById('searchUsername');
+  const profile = document.getElementById('searchProfile');
+  const command = document.getElementById('searchCommand');
+  
+  const filterConfigs = () => {
+    const usernameFilter = username.value.toLowerCase();
+    const profileFilter = profile.value.toLowerCase();
+    const commandFilter = command.value.toLowerCase();
+    
+    const filtered = allConfigurations.filter(config => {
+      const matchesUsername = !usernameFilter || 
+        config.userId.username.toLowerCase().includes(usernameFilter);
+      
+      const matchesProfile = !profileFilter || 
+        config.profiles.some(p => p.title.toLowerCase().includes(profileFilter));
+      
+      const matchesCommand = !commandFilter || 
+        config.commands.some(c => 
+          c.title.toLowerCase().includes(commandFilter) || 
+          c.command.toLowerCase().includes(commandFilter)
+        );
+      
+      return matchesUsername && matchesProfile && matchesCommand;
+    });
+    
+    renderConfigurationsGrid(filtered);
+  };
+  
+  username.addEventListener('input', filterConfigs);
+  profile.addEventListener('input', filterConfigs);
+  command.addEventListener('input', filterConfigs);
 }
 
 function renderConfigurationsGrid(configurations) {
@@ -357,8 +405,12 @@ function renderConfigurationsGrid(configurations) {
     return;
   }
   
-  grid.innerHTML = configurations.map(config => `
-    <div class="config-card">
+  grid.innerHTML = configurations.map(config => {
+    const profilesList = config.profiles.map(p => escapeHtml(p.title)).join(', ');
+    const commandsList = config.commands.map(c => escapeHtml(c.title)).join(', ');
+    
+    return `
+    <div class="config-card" data-username="${escapeHtml(config.userId.username)}" data-profiles="${profilesList}" data-commands="${commandsList}">
       <div class="config-card-header">
         <h3>${escapeHtml(config.userId.username)}</h3>
         <button class="btn btn-small btn-secondary" onclick="viewConfiguration('${config._id}')">View</button>
@@ -377,7 +429,7 @@ function renderConfigurationsGrid(configurations) {
         Last synced: ${new Date(config.lastSyncedAt).toLocaleString()}
       </p>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 async function viewConfiguration(configId) {
