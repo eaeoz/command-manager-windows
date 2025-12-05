@@ -1225,6 +1225,58 @@ function setupMobileMenuListeners() {
 }
 
 
+// Contact Form Handler with reCAPTCHA v3
+async function handleContactSubmit(e) {
+  e.preventDefault();
+  
+  const name = document.getElementById('contactName').value;
+  const email = document.getElementById('contactEmail').value;
+  const subject = document.getElementById('contactSubject').value;
+  const message = document.getElementById('contactMessage').value;
+  
+  const errorDiv = document.getElementById('contactError');
+  errorDiv.classList.remove('show');
+  
+  const btn = document.getElementById('contactSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  
+  try {
+    // Execute reCAPTCHA v3
+    const recaptchaToken = await grecaptcha.execute('6Lf_CQYsAAAAAGZnHRb5i0-lkM648YVwxuQjbuyg', { action: 'contact' });
+    
+    const response = await fetch(`${API_URL}/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, subject, message, recaptchaToken })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      showToast('Message sent successfully! We\'ll get back to you soon.', 'success');
+      document.getElementById('contactForm').reset();
+      closeModal('contactModal');
+    } else {
+      throw new Error(data.message || 'Failed to send message');
+    }
+  } catch (error) {
+    errorDiv.textContent = error.message;
+    errorDiv.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send Message';
+  }
+}
+
+// Setup contact form listener
+document.addEventListener('DOMContentLoaded', () => {
+  const contactForm = document.getElementById('contactForm');
+  if (contactForm) {
+    contactForm.addEventListener('submit', handleContactSubmit);
+  }
+});
+
 // Make functions global
 window.showRegister = showRegister;
 window.showLogin = showLogin;
@@ -1241,3 +1293,4 @@ window.updatePushButton = updatePushButton;
 window.removeDevice = removeDevice;
 window.toggleMobileMenu = toggleMobileMenu;
 window.closeMobileMenu = closeMobileMenu;
+window.openModal = openModal;

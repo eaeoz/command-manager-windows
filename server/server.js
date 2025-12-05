@@ -50,9 +50,15 @@ app.use('/api', apiLimiter);
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/config', require('./routes/config'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/contact', require('./routes/contact'));
 
 // Serve admin panel static files
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Favicon route (prevent 404)
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end();
+});
 
 // User dashboard route
 app.get('/', (req, res) => {

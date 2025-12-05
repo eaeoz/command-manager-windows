@@ -36,6 +36,8 @@
                     <p class="auth-switch">
                         Don't have an account? 
                         <a href="#" onclick="showRegister(); return false;">Create one</a>
+                        <br>
+                        <a href="#" onclick="openModal('contactModal'); return false;" style="font-size: 0.875rem; color: var(--primary); margin-top: 0.5rem; display: inline-block;">Contact Us</a>
                     </p>
                 </div>
 
@@ -67,6 +69,8 @@
                     <p class="auth-switch">
                         Already have an account? 
                         <a href="#" onclick="showLogin(); return false;">Sign in</a>
+                        <br>
+                        <a href="#" onclick="openModal('contactModal'); return false;" style="font-size: 0.875rem; color: var(--primary); margin-top: 0.5rem; display: inline-block;">Contact Us</a>
                     </p>
                 </div>
             </div>
@@ -461,9 +465,55 @@
         </div>
     </div>
 
+    <!-- Contact Modal -->
+    <div class="modal" id="contactModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📧 Contact Us</h3>
+                <button class="modal-close" onclick="closeModal('contactModal')">&times;</button>
+            </div>
+            <form id="contactForm">
+                <div class="form-group">
+                    <label for="contactName">Your Name</label>
+                    <input type="text" id="contactName" required placeholder="John Doe" minlength="2">
+                </div>
+                <div class="form-group">
+                    <label for="contactEmail">Your Email</label>
+                    <input type="email" id="contactEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="contactSubject">Subject</label>
+                    <input type="text" id="contactSubject" required placeholder="How can we help?" minlength="5">
+                </div>
+                <div class="form-group">
+                    <label for="contactMessage">Message</label>
+                    <textarea id="contactMessage" required placeholder="Your message..." rows="5" minlength="10"></textarea>
+                </div>
+                
+                <!-- reCAPTCHA v3 Terms -->
+                <div class="recaptcha-terms" style="margin: 1rem 0;">
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;">
+                        This site is protected by reCAPTCHA and the Google
+                        <a href="https://policies.google.com/privacy" target="_blank" style="color: var(--primary);">Privacy Policy</a> and
+                        <a href="https://policies.google.com/terms" target="_blank" style="color: var(--primary);">Terms of Service</a> apply.
+                    </p>
+                </div>
+                
+                <div class="error-message" id="contactError"></div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('contactModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="contactSubmitBtn">Send Message</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 
+    <!-- reCAPTCHA v3 Script -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lf_CQYsAAAAAGZnHRb5i0-lkM648YVwxuQjbuyg"></script>
     <script src="user.js"></script>
 </body>
 </html>
