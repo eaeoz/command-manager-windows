@@ -984,6 +984,10 @@ body {
     box-shadow: 4px 0 24px var(--shadow-lg);
   }
   
+  .sidebar-header {
+    padding-left: 64px;
+  }
+  
   .sidebar-close {
     display: flex;
   }
