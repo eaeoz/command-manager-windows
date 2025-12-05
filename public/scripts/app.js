@@ -181,19 +181,19 @@ function renderCommands() {
                             <i class="fas fa-external-link-alt"></i>
                         </button>
                     ` : ''}
+                    <button class="btn-icon btn-secondary" onclick="editCommand('${escapeHtml(cmd.title)}')" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-icon btn-danger" onclick="deleteCommand('${escapeHtml(cmd.title)}')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </div>
             <div class="command-text">${escapeHtml(cmd.command)}</div>
             <div class="command-footer">
-                <button class="btn-success" onclick="runCommand('${escapeHtml(cmd.command)}', '${escapeHtml(cmd.profile)}')">
+                <button class="btn-success btn-run-full" onclick="runCommand('${escapeHtml(cmd.command)}', '${escapeHtml(cmd.profile)}')">
                     <i class="fas fa-play"></i>
-                    Run
-                </button>
-                <button class="btn-secondary" onclick="editCommand('${escapeHtml(cmd.title)}')">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn-danger" onclick="deleteCommand('${escapeHtml(cmd.title)}')">
-                    <i class="fas fa-trash"></i>
+                    Run Command
                 </button>
             </div>
         </div>

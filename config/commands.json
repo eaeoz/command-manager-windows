@@ -33,5 +33,12 @@
     "command": "ping netcify.netlify.app",
     "url": "https://netcify.netlify.app",
     "profile": "Profile 1"
+  },
+  {
+    "lineNumber": 6,
+    "title": "test 6",
+    "command": "ping milliyet.com",
+    "url": "https://milliyet.com",
+    "profile": "Profile 1"
   }
 ]

@@ -346,12 +346,15 @@ body {
 }
 
 .command-footer {
-    display: flex;
-    gap: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
 }
 
-.command-footer button {
-    flex: 1;
+.btn-run-full {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
 }
 
 /* Console */
