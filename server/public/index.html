@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>⚡ Command Manager - User Dashboard</title>
+  <title>>_ Command Manager - User Dashboard</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.ico">
     <link rel="stylesheet" href="user.css">
 </head>
@@ -12,10 +12,10 @@
         <!-- Login/Register Screen -->
         <div class="auth-screen" id="authScreen">
             <div class="auth-container">
-                <div class="auth-header">
-                    <h1>⚡ Command Manager</h1>
-                    <p>Manage your SSH commands and profiles</p>
-                </div>
+            <div class="auth-header">
+                <h1>>_ Command Manager</h1>
+                <p>Manage your SSH commands and profiles</p>
+            </div>
 
                 <!-- Login Form -->
                 <div class="auth-form" id="loginContainer">
@@ -85,7 +85,7 @@
             <!-- Sidebar -->
             <aside class="sidebar" id="sidebar">
                 <div class="sidebar-header">
-                    <h2>⚡ Command Manager</h2>
+                    <h2>>_ Command Manager</h2>
                 </div>
                 <nav class="sidebar-nav">
                     <a href="#" class="nav-item active" data-page="overview">
@@ -297,13 +297,13 @@
                             </div>
                         </div>
 
-                        <div class="devices-section" style="margin-top: 2rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div class="devices-section">
+                            <div class="devices-header">
                                 <div>
-                                    <h3 style="margin-bottom: 0.5rem;">📱 Connected Devices</h3>
-                                    <p style="color: var(--text-muted); margin: 0;">Select devices to push your cloud configuration to them</p>
+                                    <h3>📱 Connected Devices</h3>
+                                    <p>Select devices to push your cloud configuration to them</p>
                                 </div>
-                                <button class="btn btn-secondary" id="refreshDevicesBtn" title="Refresh Devices">
+                                <button class="btn btn-secondary btn-icon-only" id="refreshDevicesBtn" title="Refresh Devices">
                                     🔄
                                 </button>
                             </div>
@@ -311,12 +311,12 @@
                             <div class="devices-list" id="devicesList">
                                 <p class="loading">Loading devices...</p>
                             </div>
-                        </div>
-
-                        <div class="sync-actions" style="margin-top: 2rem;">
-                            <button class="btn btn-primary btn-large" id="pushToDevicesBtn" disabled>
-                                ⬇️ Push to Selected Devices
-                            </button>
+                            
+                            <div class="sync-actions">
+                                <button class="btn btn-primary btn-large" id="pushToDevicesBtn" disabled>
+                                    ⬇️ Push to Selected Devices
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -100,11 +100,11 @@ app.use('/api/contact', require('./routes/contact'));
 // Serve admin panel static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Favicon route - Serve lightning bolt emoji as SVG
+// Favicon route - Serve terminal/command prompt icon as SVG
 app.get('/favicon.ico', (req, res) => {
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <text y="75" font-size="75">⚡</text>
+      <text y="75" font-size="65" font-family="monospace" font-weight="bold">>_</text>
     </svg>
   `;
   res.setHeader('Content-Type', 'image/svg+xml');

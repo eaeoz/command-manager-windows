@@ -1317,19 +1317,44 @@ textarea:focus {
 /* Device List Styles */
 .devices-section {
   margin-top: 32px;
+  background: var(--bg-primary);
+  padding: 28px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
-.devices-section h3 {
+.devices-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.devices-header > div {
+  flex: 1;
+  min-width: 200px;
+}
+
+.devices-header h3 {
   font-size: 20px;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   color: var(--text-primary);
 }
 
-.devices-section > p {
+.devices-header p {
   color: var(--text-secondary);
-  margin-bottom: 24px;
+  margin: 0;
   font-size: 15px;
+}
+
+.btn-icon-only {
+  padding: 10px 16px;
+  min-width: auto;
+  flex-shrink: 0;
 }
 
 .devices-list {
@@ -1511,13 +1536,52 @@ textarea:focus {
 .sync-actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   gap: 16px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
 }
 
 .sync-actions .btn {
   flex-shrink: 0;
+  min-width: 220px;
+}
+
+@media (max-width: 768px) {
+  .devices-section {
+    padding: 20px;
+  }
+  
+  .devices-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .devices-header > div {
+    min-width: 100%;
+  }
+  
+  .sync-actions {
+    margin-top: 20px;
+    padding-top: 20px;
+  }
+  
+  .sync-actions .btn {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .devices-section {
+    padding: 16px;
+  }
+  
+  .btn-icon-only {
+    padding: 8px 12px;
+  }
 }
 
 /* Loading State */

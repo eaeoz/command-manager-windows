@@ -27,11 +27,11 @@ async function sendVerificationEmail(user, token) {
   const mailOptions = {
     from: `"Command Manager" <${process.env.SMTP_USER}>`,
     to: user.email,
-    subject: '⚡ Verify Your Email - Command Manager',
+    subject: '>_ Verify Your Email - Command Manager',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
-          <h1 style="color: white; margin: 0;">⚡ Command Manager</h1>
+          <h1 style="color: white; margin: 0; font-family: monospace;">>_ Command Manager</h1>
           <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Email Verification</p>
         </div>
         
@@ -63,7 +63,7 @@ async function sendVerificationEmail(user, token) {
         </div>
         
         <div style="background: #e9ecef; padding: 20px; text-align: center; font-size: 12px; color: #6c757d;">
-          <p style="margin: 0;">⚡ Command Manager - SSH Command Management</p>
+          <p style="margin: 0; font-family: monospace;">>_ Command Manager - SSH Command Management</p>
           <p style="margin: 5px 0 0 0;">© ${new Date().getFullYear()} All rights reserved</p>
         </div>
       </div>
@@ -342,11 +342,11 @@ async function sendEmailChangeVerification(user, newEmail, token) {
   const mailOptions = {
     from: `"Command Manager" <${process.env.SMTP_USER}>`,
     to: newEmail,
-    subject: '⚡ Verify Your New Email - Command Manager',
+    subject: '>_ Verify Your New Email - Command Manager',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
-          <h1 style="color: white; margin: 0;">⚡ Command Manager</h1>
+          <h1 style="color: white; margin: 0; font-family: monospace;">>_ Command Manager</h1>
           <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Email Change Verification</p>
         </div>
         
@@ -381,7 +381,7 @@ async function sendEmailChangeVerification(user, newEmail, token) {
         </div>
         
         <div style="background: #e9ecef; padding: 20px; text-align: center; font-size: 12px; color: #6c757d;">
-          <p style="margin: 0;">⚡ Command Manager - SSH Command Management</p>
+          <p style="margin: 0; font-family: monospace;">>_ Command Manager - SSH Command Management</p>
           <p style="margin: 5px 0 0 0;">© ${new Date().getFullYear()} All rights reserved</p>
         </div>
       </div>
