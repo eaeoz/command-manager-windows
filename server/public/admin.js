@@ -454,13 +454,13 @@ async function viewConfiguration(configId) {
           </div>
           
           <div style="margin-bottom: 24px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-right: 8px;">
               <h4 style="margin: 0;">Profiles (<span id="profileCount">${config.profiles.length}</span>)</h4>
               <button class="btn btn-small btn-primary" onclick="addConfigProfile()" title="Add Profile">+ Add Profile</button>
             </div>
             ${config.profiles.length > 0 ? `
-              <input type="text" id="searchProfiles" class="filter-input" placeholder="🔍 Search profiles by title, host, or username..." style="margin-bottom: 12px; width: 100%;">
-              <div id="profilesList" style="max-height: 300px; overflow-y: auto;">
+              <input type="text" id="searchProfiles" class="filter-input" placeholder="🔍 Search profiles by title, host, or username..." style="margin-bottom: 12px; width: calc(100% - 8px); margin-right: 8px;">
+              <div id="profilesList" style="max-height: 300px; overflow-y: auto; padding-right: 8px;">
                 ${config.profiles.map((p, index) => `
                   <div class="profile-item" data-title="${escapeHtml(p.title).toLowerCase()}" data-host="${escapeHtml(p.host).toLowerCase()}" data-username="${escapeHtml(p.username).toLowerCase()}" style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: start;">
                     <div style="flex: 1;">
@@ -480,13 +480,13 @@ async function viewConfiguration(configId) {
           </div>
           
           <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-right: 8px;">
               <h4 style="margin: 0;">Commands (<span id="commandCount">${config.commands.length}</span>)</h4>
               <button class="btn btn-small btn-primary" onclick="addConfigCommand()" title="Add Command">+ Add Command</button>
             </div>
             ${config.commands.length > 0 ? `
-              <input type="text" id="searchCommands" class="filter-input" placeholder="🔍 Search commands by title, command text, or profile..." style="margin-bottom: 12px; width: 100%;">
-              <div id="commandsList" style="max-height: 300px; overflow-y: auto;">
+              <input type="text" id="searchCommands" class="filter-input" placeholder="🔍 Search commands by title, command text, or profile..." style="margin-bottom: 12px; width: calc(100% - 8px); margin-right: 8px;">
+              <div id="commandsList" style="max-height: 300px; overflow-y: auto; padding-right: 8px;">
                 ${config.commands.map((c, index) => `
                   <div class="command-item" data-title="${escapeHtml(c.title).toLowerCase()}" data-command="${escapeHtml(c.command).toLowerCase()}" data-profile="${escapeHtml(c.profile).toLowerCase()}" style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: start;">
                     <div style="flex: 1;">
