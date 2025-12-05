@@ -419,8 +419,61 @@ body {
     background: var(--bg-primary);
     padding: 0.75rem;
     border-radius: var(--border-radius-sm);
-    word-break: break-all;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
     line-height: 1.5;
+}
+
+.command-text::-webkit-scrollbar {
+    height: 6px;
+}
+
+.command-text::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 3px;
+}
+
+.command-text::-webkit-scrollbar-thumb {
+    background: var(--bg-tertiary);
+    border-radius: 3px;
+}
+
+.command-text::-webkit-scrollbar-thumb:hover {
+    background: var(--border-color);
+}
+
+.command-url-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.command-url-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.command-url-badge i {
+    color: white;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.command-url-badge span {
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
 }
 
 .command-footer {

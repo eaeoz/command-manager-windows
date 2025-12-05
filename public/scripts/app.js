@@ -218,11 +218,6 @@ function renderCommands() {
                     </div>
                 </div>
                 <div class="command-actions">
-                    ${cmd.url ? `
-                        <button class="btn-icon" onclick="openExternalURL('${escapeHtml(cmd.url)}')" title="Open URL">
-                            <i class="fas fa-external-link-alt"></i>
-                        </button>
-                    ` : ''}
                     <button class="btn-icon btn-secondary" onclick="editCommand('${escapeHtml(cmd.title)}')" title="Edit">
                         <i class="fas fa-edit"></i>
                     </button>
@@ -232,6 +227,12 @@ function renderCommands() {
                 </div>
             </div>
             <div class="command-text">${escapeHtml(cmd.command)}</div>
+            ${cmd.url ? `
+                <div class="command-url-badge" onclick="openExternalURL('${escapeHtml(cmd.url)}')" title="Click to open: ${escapeHtml(cmd.url)}">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>${escapeHtml(cmd.url)}</span>
+                </div>
+            ` : ''}
             <div class="command-footer">
                 <button class="btn-success btn-run-full" onclick="runCommand('${escapeHtml(cmd.command)}', '${escapeHtml(cmd.profile)}')">
                     <i class="fas fa-play"></i>
