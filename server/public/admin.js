@@ -107,10 +107,13 @@ async function handleLogin(e) {
   errorDiv.classList.remove('show');
   
   try {
+    // Execute reCAPTCHA v3
+    const recaptchaToken = await grecaptcha.execute('6Lf_CQYsAAAAAGZnHRb5i0-lkM648YVwxuQjbuyg', { action: 'admin_login' });
+    
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password, recaptchaToken })
     });
     
     const data = await response.json();

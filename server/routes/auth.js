@@ -8,6 +8,7 @@ const Configuration = require('../models/Configuration');
 const Settings = require('../models/Settings');
 const { sendTokenResponse, auth } = require('../middleware/auth');
 const { authLimiter, registerLimiter } = require('../middleware/rateLimiter');
+const { verifyRecaptcha } = require('../middleware/recaptcha');
 require('dotenv').config();
 
 // Email transporter
@@ -130,6 +131,7 @@ async function sendPasswordResetEmail(user, code) {
 // @access  Public
 router.post('/register', 
   registerLimiter,
+  verifyRecaptcha,
   [
     body('username')
       .trim()
@@ -233,6 +235,7 @@ router.post('/register',
 // @access  Public
 router.post('/login',
   authLimiter,
+  verifyRecaptcha,
   [
     body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email'),
     body('password').notEmpty().withMessage('Password is required')

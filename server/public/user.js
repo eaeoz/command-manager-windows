@@ -259,10 +259,13 @@ async function handleRegister(e) {
   btn.innerHTML = '<span>Creating account...</span>';
   
   try {
+    // Execute reCAPTCHA v3
+    const recaptchaToken = await grecaptcha.execute('6Lf_CQYsAAAAAGZnHRb5i0-lkM648YVwxuQjbuyg', { action: 'register' });
+    
     const response = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password })
+      body: JSON.stringify({ username, email, password, recaptchaToken })
     });
     
     const data = await response.json();
@@ -313,10 +316,13 @@ async function handleLogin(e) {
   errorDiv.classList.remove('show');
   
   try {
+    // Execute reCAPTCHA v3
+    const recaptchaToken = await grecaptcha.execute('6Lf_CQYsAAAAAGZnHRb5i0-lkM648YVwxuQjbuyg', { action: 'login' });
+    
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password, recaptchaToken })
     });
     
     const data = await response.json();
