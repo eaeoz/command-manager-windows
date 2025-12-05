@@ -895,6 +895,7 @@ body {
 @media (max-width: 1024px) {
     .sidebar {
         width: 240px;
+        min-width: 240px;
     }
     
     .commands-grid {
@@ -909,12 +910,20 @@ body {
     
     .sidebar {
         width: 100%;
-        max-height: 200px;
+        min-width: 100%;
+        max-height: none;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
     }
     
     .commands-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Ensure sidebar doesn't get too narrow */
+.sidebar {
+    min-width: 280px;
 }
 
 /* Sync Modal Styles */
