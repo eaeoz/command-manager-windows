@@ -73,6 +73,57 @@ async function sendVerificationEmail(user, token) {
   await transporter.sendMail(mailOptions);
 }
 
+// Send password reset email
+async function sendPasswordResetEmail(user, code) {
+  const mailOptions = {
+    from: `"Command Manager" <${process.env.SMTP_USER}>`,
+    to: user.email,
+    subject: '>_ Password Reset Code - Command Manager',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-family: monospace;">>_ Command Manager</h1>
+          <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Password Reset Request</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 30px;">
+          <h2 style="color: #333; margin-top: 0;">Hello, ${user.username}!</h2>
+          <p style="color: #666; line-height: 1.6;">
+            You requested to reset your password. Use the 4-digit code below to complete the password reset process:
+          </p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <div style="background: white; display: inline-block; padding: 20px 40px; border-radius: 12px; border: 2px solid #667eea;">
+              <span style="font-size: 48px; font-weight: bold; color: #667eea; letter-spacing: 8px; font-family: monospace;">${code}</span>
+            </div>
+          </div>
+          
+          <p style="color: #666; line-height: 1.6;">
+            Enter this code on the password reset page to set your new password.
+          </p>
+          
+          <p style="color: #999; font-size: 12px; margin-top: 30px;">
+            ⏰ This code will expire in 15 minutes.
+          </p>
+          <p style="color: #999; font-size: 12px;">
+            ⚠️ You have 3 attempts to enter the correct code.
+          </p>
+          <p style="color: #999; font-size: 12px;">
+            🔒 If you didn't request this password reset, please ignore this email. Your password will remain unchanged.
+          </p>
+        </div>
+        
+        <div style="background: #e9ecef; padding: 20px; text-align: center; font-size: 12px; color: #6c757d;">
+          <p style="margin: 0; font-family: monospace;">>_ Command Manager - SSH Command Management</p>
+          <p style="margin: 5px 0 0 0;">© ${new Date().getFullYear()} All rights reserved</p>
+        </div>
+      </div>
+    `
+  };
+  
+  await transporter.sendMail(mailOptions);
+}
+
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
@@ -895,5 +946,235 @@ router.get('/verify-email-change', async (req, res) => {
     });
   }
 });
+
+// @route   POST /api/auth/forgot-password
+// @desc    Request password reset code
+// @access  Public
+router.post('/forgot-password',
+  authLimiter,
+  [
+    body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email')
+  ],
+  async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      const user = await User.findOne({ email }).select('+passwordResetCode +passwordResetExpires +passwordResetAttempts');
+      
+      if (!user) {
+        // Don't reveal if email exists
+        return res.json({
+          success: true,
+          message: 'If the email exists, a password reset code has been sent.'
+        });
+      }
+      
+      // Generate 4-digit code
+      const resetCode = Math.floor(1000 + Math.random() * 9000).toString();
+      
+      // Hash the code before storing
+      const hashedCode = crypto
+        .createHash('sha256')
+        .update(resetCode)
+        .digest('hex');
+      
+      // Store hashed code with 15 minute expiration and reset attempts
+      user.passwordResetCode = hashedCode;
+      user.passwordResetExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
+      user.passwordResetAttempts = 0; // Reset attempts
+      await user.save();
+      
+      // Send email with code
+      try {
+        await sendPasswordResetEmail(user, resetCode);
+      } catch (emailError) {
+        console.error('Failed to send password reset email:', emailError);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to send password reset email'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: 'Password reset code sent to your email'
+      });
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error processing password reset request'
+      });
+    }
+  }
+);
+
+// @route   POST /api/auth/verify-reset-code
+// @desc    Verify password reset code
+// @access  Public
+router.post('/verify-reset-code',
+  authLimiter,
+  [
+    body('email').isEmail().normalizeEmail(),
+    body('code').isLength({ min: 4, max: 4 }).withMessage('Code must be 4 digits')
+  ],
+  async (req, res) => {
+    try {
+      const { email, code } = req.body;
+      
+      const user = await User.findOne({ email }).select('+passwordResetCode +passwordResetExpires +passwordResetAttempts');
+      
+      if (!user || !user.passwordResetCode || !user.passwordResetExpires) {
+        return res.status(400).json({
+          success: false,
+          message: 'No password reset request found'
+        });
+      }
+      
+      // Check if code has expired
+      if (user.passwordResetExpires < Date.now()) {
+        user.passwordResetCode = undefined;
+        user.passwordResetExpires = undefined;
+        user.passwordResetAttempts = undefined;
+        await user.save();
+        
+        return res.status(400).json({
+          success: false,
+          message: 'Reset code has expired. Please request a new one.'
+        });
+      }
+      
+      // Check if attempts exceeded
+      if (user.passwordResetAttempts >= 3) {
+        user.passwordResetCode = undefined;
+        user.passwordResetExpires = undefined;
+        user.passwordResetAttempts = undefined;
+        await user.save();
+        
+        return res.status(400).json({
+          success: false,
+          message: 'Maximum attempts exceeded. Please request a new reset code.'
+        });
+      }
+      
+      // Hash submitted code and compare
+      const hashedCode = crypto
+        .createHash('sha256')
+        .update(code)
+        .digest('hex');
+      
+      if (hashedCode !== user.passwordResetCode) {
+        // Increment attempts
+        user.passwordResetAttempts += 1;
+        await user.save();
+        
+        const attemptsLeft = 3 - user.passwordResetAttempts;
+        return res.status(400).json({
+          success: false,
+          message: `Invalid code. ${attemptsLeft} attempt${attemptsLeft !== 1 ? 's' : ''} remaining.`,
+          attemptsLeft
+        });
+      }
+      
+      // Code is valid
+      res.json({
+        success: true,
+        message: 'Code verified successfully'
+      });
+    } catch (error) {
+      console.error('Verify reset code error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error verifying reset code'
+      });
+    }
+  }
+);
+
+// @route   POST /api/auth/reset-password
+// @desc    Reset password with verified code
+// @access  Public
+router.post('/reset-password',
+  authLimiter,
+  [
+    body('email').isEmail().normalizeEmail(),
+    body('code').isLength({ min: 4, max: 4 }),
+    body('newPassword').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+  ],
+  async (req, res) => {
+    try {
+      const { email, code, newPassword } = req.body;
+      
+      const user = await User.findOne({ email }).select('+password +passwordResetCode +passwordResetExpires +passwordResetAttempts');
+      
+      if (!user || !user.passwordResetCode || !user.passwordResetExpires) {
+        return res.status(400).json({
+          success: false,
+          message: 'No password reset request found'
+        });
+      }
+      
+      // Check if code has expired
+      if (user.passwordResetExpires < Date.now()) {
+        user.passwordResetCode = undefined;
+        user.passwordResetExpires = undefined;
+        user.passwordResetAttempts = undefined;
+        await user.save();
+        
+        return res.status(400).json({
+          success: false,
+          message: 'Reset code has expired'
+        });
+      }
+      
+      // Check if attempts exceeded
+      if (user.passwordResetAttempts >= 3) {
+        user.passwordResetCode = undefined;
+        user.passwordResetExpires = undefined;
+        user.passwordResetAttempts = undefined;
+        await user.save();
+        
+        return res.status(400).json({
+          success: false,
+          message: 'Maximum attempts exceeded'
+        });
+      }
+      
+      // Verify code
+      const hashedCode = crypto
+        .createHash('sha256')
+        .update(code)
+        .digest('hex');
+      
+      if (hashedCode !== user.passwordResetCode) {
+        user.passwordResetAttempts += 1;
+        await user.save();
+        
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid code'
+        });
+      }
+      
+      // Reset password
+      user.password = newPassword;
+      user.passwordResetCode = undefined;
+      user.passwordResetExpires = undefined;
+      user.passwordResetAttempts = undefined;
+      await user.save();
+      
+      res.json({
+        success: true,
+        message: 'Password reset successfully. You can now log in with your new password.'
+      });
+    } catch (error) {
+      console.error('Reset password error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error resetting password'
+      });
+    }
+  }
+);
 
 module.exports = router;

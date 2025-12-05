@@ -35,10 +35,59 @@
                         <div class="error-message" id="loginError"></div>
                     </form>
                     <p class="auth-switch">
+                        <a href="#" onclick="showForgotPassword(); return false;">Forgot password?</a>
+                    </p>
+                    <p class="auth-switch">
                         Don't have an account? 
                         <a href="#" onclick="showRegister(); return false;">Create one</a>
                         <br>
                         <a href="#" onclick="openModal('contactModal'); return false;" style="font-size: 0.875rem; color: var(--primary); margin-top: 0.5rem; display: inline-block;">Contact Us</a>
+                    </p>
+                </div>
+
+                <!-- Forgot Password Form -->
+                <div class="auth-form" id="forgotPasswordContainer" style="display: none;">
+                    <h2>Reset Password</h2>
+                    <div id="forgotPasswordStep1">
+                        <p style="color: var(--text-secondary); margin-bottom: 24px;">Enter your email address and we'll send you a 4-digit code to reset your password.</p>
+                        <form id="forgotPasswordForm">
+                            <div class="form-group">
+                                <label for="forgotEmail">Email</label>
+                                <input type="email" id="forgotEmail" required placeholder="your@email.com">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <span>Send Reset Code</span>
+                            </button>
+                            <div class="error-message" id="forgotError"></div>
+                        </form>
+                    </div>
+                    
+                    <div id="forgotPasswordStep2" style="display: none;">
+                        <p style="color: var(--text-secondary); margin-bottom: 24px;">Enter the 4-digit code sent to your email and your new password.</p>
+                        <form id="resetPasswordForm">
+                            <div class="form-group">
+                                <label for="resetCode">4-Digit Code</label>
+                                <input type="text" id="resetCode" required placeholder="1234" maxlength="4" pattern="[0-9]{4}" style="text-align: center; font-size: 24px; letter-spacing: 8px; font-family: monospace;">
+                            </div>
+                            <div class="form-group">
+                                <label for="resetNewPassword">New Password</label>
+                                <input type="password" id="resetNewPassword" required placeholder="••••••••" minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label for="resetConfirmPassword">Confirm Password</label>
+                                <input type="password" id="resetConfirmPassword" required placeholder="••••••••">
+                            </div>
+                            <div id="resetAttempts" style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px; text-align: center;"></div>
+                            <button type="submit" class="btn btn-primary">
+                                <span>Reset Password</span>
+                            </button>
+                            <div class="error-message" id="resetError"></div>
+                        </form>
+                    </div>
+                    
+                    <p class="auth-switch">
+                        Remember your password? 
+                        <a href="#" onclick="showLogin(); return false;">Sign in</a>
                     </p>
                 </div>
 

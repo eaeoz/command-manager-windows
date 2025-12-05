@@ -381,6 +381,7 @@ function showRegister() {
 
 function showLogin() {
   document.getElementById('registerContainer').style.display = 'none';
+  document.getElementById('forgotPasswordContainer').style.display = 'none';
   document.getElementById('loginContainer').style.display = 'block';
 }
 
@@ -1377,9 +1378,139 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// Forgot Password Functions
+let forgotPasswordEmail = '';
+
+function showForgotPassword() {
+  document.getElementById('loginContainer').style.display = 'none';
+  document.getElementById('registerContainer').style.display = 'none';
+  document.getElementById('forgotPasswordContainer').style.display = 'block';
+  document.getElementById('forgotPasswordStep1').style.display = 'block';
+  document.getElementById('forgotPasswordStep2').style.display = 'none';
+}
+
+async function handleForgotPassword(e) {
+  e.preventDefault();
+  
+  const email = document.getElementById('forgotEmail').value;
+  forgotPasswordEmail = email;
+  const errorDiv = document.getElementById('forgotError');
+  errorDiv.classList.remove('show');
+  
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  btn.innerHTML = '<span>Sending code...</span>';
+  
+  try {
+    const response = await fetch(`${API_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      showToast('📧 Reset code sent to your email! Check your inbox.', 'success');
+      
+      // Move to step 2
+      document.getElementById('forgotPasswordStep1').style.display = 'none';
+      document.getElementById('forgotPasswordStep2').style.display = 'block';
+      document.getElementById('resetAttempts').textContent = '⏰ Code expires in 15 minutes. You have 3 attempts.';
+    } else {
+      throw new Error(data.message || 'Failed to send reset code');
+    }
+  } catch (error) {
+    errorDiv.textContent = error.message;
+    errorDiv.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>Send Reset Code</span>';
+  }
+}
+
+async function handleResetPassword(e) {
+  e.preventDefault();
+  
+  const code = document.getElementById('resetCode').value;
+  const newPassword = document.getElementById('resetNewPassword').value;
+  const confirmPassword = document.getElementById('resetConfirmPassword').value;
+  const errorDiv = document.getElementById('resetError');
+  errorDiv.classList.remove('show');
+  
+  if (newPassword !== confirmPassword) {
+    errorDiv.textContent = 'Passwords do not match';
+    errorDiv.classList.add('show');
+    return;
+  }
+  
+  if (newPassword.length < 6) {
+    errorDiv.textContent = 'Password must be at least 6 characters';
+    errorDiv.classList.add('show');
+    return;
+  }
+  
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  btn.innerHTML = '<span>Resetting password...</span>';
+  
+  try {
+    const response = await fetch(`${API_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        email: forgotPasswordEmail,
+        code,
+        newPassword
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      showToast('✅ Password reset successfully! You can now log in.', 'success');
+      
+      // Clear form and go back to login
+      e.target.reset();
+      setTimeout(() => {
+        showLogin();
+      }, 2000);
+    } else {
+      throw new Error(data.message || 'Failed to reset password');
+    }
+  } catch (error) {
+    errorDiv.textContent = error.message;
+    errorDiv.classList.add('show');
+    
+    // Update attempts remaining if included in error
+    if (error.message.includes('attempt')) {
+      const attemptsDiv = document.getElementById('resetAttempts');
+      attemptsDiv.textContent = '⚠️ ' + error.message;
+      attemptsDiv.style.color = 'var(--danger)';
+    }
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>Reset Password</span>';
+  }
+}
+
+// Setup forgot password form listeners
+document.addEventListener('DOMContentLoaded', () => {
+  const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+  if (forgotPasswordForm) {
+    forgotPasswordForm.addEventListener('submit', handleForgotPassword);
+  }
+  
+  const resetPasswordForm = document.getElementById('resetPasswordForm');
+  if (resetPasswordForm) {
+    resetPasswordForm.addEventListener('submit', handleResetPassword);
+  }
+});
+
 // Make functions global
 window.showRegister = showRegister;
 window.showLogin = showLogin;
+window.showForgotPassword = showForgotPassword;
 window.switchPage = switchPage;
 window.showAddProfileModal = showAddProfileModal;
 window.showAddCommandModal = showAddCommandModal;
