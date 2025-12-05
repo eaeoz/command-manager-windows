@@ -592,6 +592,10 @@ async function loadDevices() {
 function renderDevices(devices) {
   const container = document.getElementById('devicesList');
   
+  // Filter to show only online devices by default
+  const onlineDevices = devices.filter(d => d.online);
+  const offlineDevices = devices.filter(d => !d.online);
+  
   if (!devices || devices.length === 0) {
     container.innerHTML = `
       <div class="empty-devices">
@@ -604,7 +608,20 @@ function renderDevices(devices) {
     return;
   }
   
-  container.innerHTML = devices.map(device => `
+  if (onlineDevices.length === 0) {
+    container.innerHTML = `
+      <div class="empty-devices">
+        <div class="icon">💻</div>
+        <h4>No Online Devices</h4>
+        <p>No devices are currently online.<br>Open the desktop app and login to see it here.</p>
+        ${offlineDevices.length > 0 ? `<p style="margin-top: 12px; font-size: 13px;">You have ${offlineDevices.length} offline device(s) that can be removed.</p>` : ''}
+      </div>
+    `;
+    document.getElementById('pushToDevicesBtn').disabled = true;
+    return;
+  }
+  
+  container.innerHTML = onlineDevices.map(device => `
     <div class="device-item">
       <input type="checkbox" class="device-checkbox" value="${escapeHtml(device.deviceId)}" onchange="updatePushButton()">
       <div class="device-item-icon">💻</div>
