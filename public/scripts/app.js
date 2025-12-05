@@ -696,11 +696,18 @@ async function registerDevice() {
     const os = require('os');
     
     // Create a unique device ID based on hostname and network
-    const deviceId = `${os.hostname()}-${os.platform()}-${Date.now()}`.replace(/[^a-zA-Z0-9-]/g, '-');
-    const deviceName = `${os.hostname()} (${os.platform()})`;
+    // Generate a consistent device ID based on machine info (without timestamp)
+    // This ensures the same device gets the same ID across sessions
+    const machineId = `${os.hostname()}-${os.platform()}-${os.arch()}`.replace(/[^a-zA-Z0-9-]/g, '-').toLowerCase();
+    const deviceId = `dev-${machineId}`;
+    
+    // Create a friendly device name
+    const deviceName = `${os.hostname()} (${os.platform()} ${os.arch()})`;
     
     // Store device ID for future use
     state.deviceId = deviceId;
+    
+    console.log('Device Info:', { deviceId, deviceName });
     
     try {
         const response = await fetch(`${serverUrl}/api/auth/register-device`, {
@@ -959,7 +966,26 @@ async function handleSyncPull() {
     }
 }
 
-function handleSyncLogout() {
+async function handleSyncLogout() {
+    const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+    
+    // Mark device as offline before logging out
+    if (state.authToken && state.deviceId) {
+        try {
+            await fetch(`${serverUrl}/api/auth/device-logout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${state.authToken}`
+                },
+                body: JSON.stringify({ deviceId: state.deviceId })
+            });
+            console.log('Device marked as offline');
+        } catch (error) {
+            console.error('Device logout error:', error);
+        }
+    }
+    
     // Stop all intervals
     if (state.syncRefreshInterval) {
         clearInterval(state.syncRefreshInterval);

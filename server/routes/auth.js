@@ -149,7 +149,7 @@ router.post('/login',
 );
 
 // @route   POST /api/auth/logout
-// @desc    Logout user
+// @desc    Logout user (web dashboard)
 // @access  Private
 router.post('/logout', (req, res) => {
   res.cookie('token', 'none', {
@@ -161,6 +161,50 @@ router.post('/logout', (req, res) => {
     success: true,
     message: 'Logged out successfully'
   });
+});
+
+// @route   POST /api/auth/device-logout
+// @desc    Logout device (Electron app) - marks device as offline
+// @access  Private
+router.post('/device-logout', auth, async (req, res) => {
+  try {
+    const { deviceId } = req.body;
+    
+    if (!deviceId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Device ID is required'
+      });
+    }
+    
+    const user = await User.findById(req.userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    const device = user.devices.find(d => d.deviceId === deviceId);
+    
+    if (device) {
+      device.online = false;
+      device.lastSeen = Date.now();
+      await user.save();
+    }
+    
+    res.json({
+      success: true,
+      message: 'Device logged out successfully'
+    });
+  } catch (error) {
+    console.error('Device logout error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error logging out device'
+    });
+  }
 });
 
 // @route   GET /api/auth/me
