@@ -492,8 +492,13 @@ router.post('/heartbeat', auth, async (req, res) => {
     const device = user.devices.find(d => d.deviceId === deviceId);
     
     if (device) {
+      // Only update if device is not explicitly offline (logged out)
+      // If device.online is false, it means user manually logged out
+      // Don't override that with heartbeat
+      if (device.online !== false) {
+        device.online = true;
+      }
       device.lastSeen = Date.now();
-      device.online = true;
       await user.save();
     }
     

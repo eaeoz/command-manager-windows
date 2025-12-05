@@ -262,4 +262,50 @@ router.post('/push-to-devices', protect, async (req, res) => {
   }
 });
 
+// @route   POST /api/config/clear-pending-push
+// @desc    Clear pending push flag after device receives configuration
+// @access  Private
+router.post('/clear-pending-push', protect, async (req, res) => {
+  try {
+    const { deviceId } = req.body;
+
+    if (!deviceId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Device ID is required'
+      });
+    }
+
+    const User = require('../models/User');
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Find and clear the pending push for this device
+    const device = user.devices.find(d => d.deviceId === deviceId);
+    if (device) {
+      device.pendingPush = false;
+      device.pushData = null;
+      await user.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Pending push cleared'
+    });
+  } catch (error) {
+    console.error('Clear pending push error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error clearing pending push',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;

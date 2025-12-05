@@ -796,6 +796,8 @@ async function checkPendingPush() {
 }
 
 async function applyPushedConfiguration(pushData) {
+    const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+    
     try {
         const { profiles, commands } = pushData;
         
@@ -818,8 +820,18 @@ async function applyPushedConfiguration(pushData) {
         renderCommands();
         updateStats();
         
+        // Clear the pending push flag on server
+        await fetch(`${serverUrl}/api/config/clear-pending-push`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${state.authToken}`
+            },
+            body: JSON.stringify({ deviceId: state.deviceId })
+        });
+        
         showNotification('Configuration updated from cloud!', 'success');
-        console.log('Configuration applied successfully');
+        console.log('Configuration applied successfully and pending push cleared');
     } catch (error) {
         console.error('Apply configuration error:', error);
     }
@@ -969,7 +981,23 @@ async function handleSyncPull() {
 async function handleSyncLogout() {
     const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
     
-    // Mark device as offline before logging out
+    // FIRST: Stop all intervals to prevent new heartbeats
+    if (state.syncRefreshInterval) {
+        clearInterval(state.syncRefreshInterval);
+        state.syncRefreshInterval = null;
+    }
+    
+    if (state.heartbeatInterval) {
+        clearInterval(state.heartbeatInterval);
+        state.heartbeatInterval = null;
+    }
+    
+    if (state.pendingPushInterval) {
+        clearInterval(state.pendingPushInterval);
+        state.pendingPushInterval = null;
+    }
+    
+    // THEN: Mark device as offline (after stopping heartbeat)
     if (state.authToken && state.deviceId) {
         try {
             await fetch(`${serverUrl}/api/auth/device-logout`, {
@@ -986,22 +1014,7 @@ async function handleSyncLogout() {
         }
     }
     
-    // Stop all intervals
-    if (state.syncRefreshInterval) {
-        clearInterval(state.syncRefreshInterval);
-        state.syncRefreshInterval = null;
-    }
-    
-    if (state.heartbeatInterval) {
-        clearInterval(state.heartbeatInterval);
-        state.heartbeatInterval = null;
-    }
-    
-    if (state.pendingPushInterval) {
-        clearInterval(state.pendingPushInterval);
-        state.pendingPushInterval = null;
-    }
-    
+    // FINALLY: Clear state
     state.authToken = null;
     state.userEmail = null;
     state.deviceId = null;

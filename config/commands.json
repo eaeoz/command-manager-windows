@@ -1,17 +1,25 @@
 [
   {
     "lineNumber": 2,
+    "title": "Restart Server",
+    "command": "reboot",
+    "profile": "Profile 1",
+    "url": "",
+    "_id": "6932552da6e998cdd8179b46"
+  },
+  {
+    "lineNumber": 2,
     "title": "test",
     "command": "ping google.com",
     "profile": "Profile 1",
     "url": "https://google.com",
-    "_id": "6932389fb18dbec4d41a31e9"
+    "_id": "6932552da6e998cdd8179b47"
   },
   {
     "lineNumber": 3,
-    "title": "jping mynet.com",
-    "command": "ping google.com",
-    "url": "https://milliyet.com",
-    "profile": "test profilei"
+    "title": "ping google",
+    "command": "ping -c 3  google.com",
+    "url": "https://www.google.com",
+    "profile": "Profile 1"
   }
 ]

@@ -5,13 +5,21 @@
     "username": "user1",
     "password": "password1",
     "port": 22,
-    "_id": "6932389fb18dbec4d41a31e7"
+    "_id": "6932552da6e998cdd8179b44"
   },
   {
     "title": "test profilei",
+    "host": "192.168.1.1",
     "username": "test ",
     "password": "testtest",
-    "host": "192.168.1.1",
+    "port": 22,
+    "_id": "6932552da6e998cdd8179b45"
+  },
+  {
+    "title": "mdedia",
+    "username": "root",
+    "password": "root",
+    "host": "192.168.1.240",
     "port": "22"
   }
 ]
