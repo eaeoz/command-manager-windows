@@ -796,14 +796,34 @@ function addConfigProfile() {
 function addConfigCommand() {
   const config = window.currentViewedConfig;
   
+  // Check if user has profiles
+  if (config.profiles.length === 0) {
+    alert('Please add at least one profile before adding commands.');
+    return;
+  }
+  
   const title = prompt('Command Title:');
   if (!title) return;
   
   const command = prompt('Command:');
   if (!command) return;
   
-  const profile = prompt('Profile:');
-  if (!profile) return;
+  // Create profile selection message
+  let profileMessage = 'Select Profile by number:\n\n';
+  config.profiles.forEach((p, index) => {
+    profileMessage += `${index + 1}. ${p.title} (${p.username}@${p.host}:${p.port})\n`;
+  });
+  
+  const profileSelection = prompt(profileMessage + '\nEnter profile number:');
+  if (!profileSelection) return;
+  
+  const profileIndex = parseInt(profileSelection) - 1;
+  if (profileIndex < 0 || profileIndex >= config.profiles.length) {
+    alert('Invalid profile selection');
+    return;
+  }
+  
+  const selectedProfile = config.profiles[profileIndex].title;
   
   const url = prompt('URL (optional):');
   
@@ -817,7 +837,7 @@ function addConfigCommand() {
     lineNumber: maxLineNumber + 1,
     title: title,
     command: command,
-    profile: profile,
+    profile: selectedProfile,
     url: url || ''
   };
   
