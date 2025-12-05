@@ -21,12 +21,25 @@ async function checkEmailVerification() {
   const token = urlParams.get('token');
   
   if (token) {
+    // Check if this is for email change or initial email verification
+    const isEmailChange = window.location.pathname === '/verify-email-change';
+    const endpoint = isEmailChange ? '/auth/verify-email-change' : '/auth/verify-email';
+    
     try {
-      const response = await fetch(`${API_URL}/auth/verify-email?token=${token}`);
+      const response = await fetch(`${API_URL}${endpoint}?token=${token}`);
       const data = await response.json();
       
       if (data.success) {
         showToast('✅ ' + data.message, 'success');
+        
+        // If email was changed, log out the user so they can login with new email
+        if (isEmailChange && authToken) {
+          setTimeout(() => {
+            showToast('Please log in with your new email address', 'info');
+            handleLogout();
+          }, 3000);
+        }
+        
         // Remove token from URL
         window.history.replaceState({}, document.title, window.location.pathname);
       } else {
@@ -35,7 +48,7 @@ async function checkEmailVerification() {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     } catch (error) {
-      showToast('❌ Email verification failed', 'error');
+      showToast('❌ Verification failed', 'error');
       // Remove token from URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -1058,15 +1071,29 @@ async function handleUpdateProfile(e) {
     });
     
     if (response.success) {
-      currentUser = response.user;
-      localStorage.setItem('userCurrentUser', JSON.stringify(currentUser));
-      
-      // Update UI
-      document.getElementById('currentUser').textContent = currentUser.username;
-      document.getElementById('currentUserEmail').textContent = currentUser.email;
-      document.getElementById('welcomeUser').textContent = currentUser.username;
-      
-      showToast('Profile updated successfully!', 'success');
+      // Check if email verification is required
+      if (response.emailVerificationRequired) {
+        showToast(`📧 ${response.message}`, 'success');
+        // Don't update the email in UI yet - it will update after verification
+        // But update username if it was changed
+        if (username !== currentUser.username) {
+          currentUser.username = username;
+          localStorage.setItem('userCurrentUser', JSON.stringify(currentUser));
+          document.getElementById('currentUser').textContent = currentUser.username;
+          document.getElementById('welcomeUser').textContent = currentUser.username;
+        }
+      } else {
+        // Normal update (username only or no changes)
+        currentUser = response.user;
+        localStorage.setItem('userCurrentUser', JSON.stringify(currentUser));
+        
+        // Update UI
+        document.getElementById('currentUser').textContent = currentUser.username;
+        document.getElementById('currentUserEmail').textContent = currentUser.email;
+        document.getElementById('welcomeUser').textContent = currentUser.username;
+        
+        showToast(response.message || 'Profile updated successfully!', 'success');
+      }
     }
   } catch (error) {
     showToast('Failed to update profile: ' + error.message, 'error');

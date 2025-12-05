@@ -117,6 +117,11 @@ app.get('/verify-email', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Email change verification route - serves the user dashboard with token in URL
+app.get('/verify-email-change', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // User dashboard route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

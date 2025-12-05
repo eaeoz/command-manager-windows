@@ -335,6 +335,62 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
+// Send email change verification email
+async function sendEmailChangeVerification(user, newEmail, token) {
+  const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:5000'}/verify-email-change?token=${token}`;
+  
+  const mailOptions = {
+    from: `"Command Manager" <${process.env.SMTP_USER}>`,
+    to: newEmail,
+    subject: '⚡ Verify Your New Email - Command Manager',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+          <h1 style="color: white; margin: 0;">⚡ Command Manager</h1>
+          <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Email Change Verification</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 30px;">
+          <h2 style="color: #333; margin-top: 0;">Hello, ${user.username}!</h2>
+          <p style="color: #666; line-height: 1.6;">
+            You requested to change your email address from <strong>${user.email}</strong> to <strong>${newEmail}</strong>.
+          </p>
+          <p style="color: #666; line-height: 1.6;">
+            To confirm this change, please verify your new email address by clicking the button below:
+          </p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+              ✅ Verify New Email Address
+            </a>
+          </div>
+          
+          <p style="color: #666; font-size: 14px; line-height: 1.6;">
+            Or copy and paste this link into your browser:
+          </p>
+          <p style="color: #667eea; font-size: 12px; word-break: break-all; background: white; padding: 10px; border-radius: 4px;">
+            ${verificationUrl}
+          </p>
+          
+          <p style="color: #999; font-size: 12px; margin-top: 30px;">
+            ⏰ This link will expire in 24 hours.
+          </p>
+          <p style="color: #999; font-size: 12px;">
+            🔒 If you didn't request this change, please ignore this email. Your current email address will remain unchanged.
+          </p>
+        </div>
+        
+        <div style="background: #e9ecef; padding: 20px; text-align: center; font-size: 12px; color: #6c757d;">
+          <p style="margin: 0;">⚡ Command Manager - SSH Command Management</p>
+          <p style="margin: 5px 0 0 0;">© ${new Date().getFullYear()} All rights reserved</p>
+        </div>
+      </div>
+    `
+  };
+  
+  await transporter.sendMail(mailOptions);
+}
+
 // @route   PUT /api/auth/update-profile
 // @desc    Update user profile
 // @access  Private
@@ -347,7 +403,7 @@ router.put('/update-profile',
   async (req, res) => {
     try {
       const { username, email } = req.body;
-      const user = await User.findById(req.userId);
+      const user = await User.findById(req.userId).select('+pendingEmail +pendingEmailToken +pendingEmailExpires');
       
       if (!user) {
         return res.status(404).json({
@@ -356,7 +412,9 @@ router.put('/update-profile',
         });
       }
       
-      // Check if username or email already taken
+      let updateMessage = '';
+      
+      // Update username if provided and different
       if (username && username !== user.username) {
         const existing = await User.findOne({ username });
         if (existing) {
@@ -366,8 +424,10 @@ router.put('/update-profile',
           });
         }
         user.username = username;
+        updateMessage = 'Username updated successfully';
       }
       
+      // Handle email change - requires verification
       if (email && email !== user.email) {
         const existing = await User.findOne({ email });
         if (existing) {
@@ -376,17 +436,43 @@ router.put('/update-profile',
             message: 'Email already taken'
           });
         }
-        user.email = email;
+        
+        // Generate verification token for new email
+        const verificationToken = user.generateEmailChangeToken(email);
+        await user.save();
+        
+        // Send verification email to NEW email address
+        try {
+          await sendEmailChangeVerification(user, email, verificationToken);
+          
+          return res.json({
+            success: true,
+            user,
+            message: 'Verification email sent to your new email address. Please check your inbox and verify to complete the email change.',
+            emailVerificationRequired: true,
+            pendingEmail: email
+          });
+        } catch (emailError) {
+          console.error('Failed to send email change verification:', emailError);
+          return res.status(500).json({
+            success: false,
+            message: 'Failed to send verification email. Please try again.'
+          });
+        }
       }
       
-      await user.save();
+      // Save if only username was updated
+      if (username && username !== user.username) {
+        await user.save();
+      }
       
       res.json({
         success: true,
         user,
-        message: 'Profile updated successfully'
+        message: updateMessage || 'Profile updated successfully'
       });
     } catch (error) {
+      console.error('Update profile error:', error);
       res.status(500).json({
         success: false,
         message: 'Error updating profile'
@@ -755,5 +841,59 @@ router.post('/resend-verification',
     }
   }
 );
+
+// @route   GET /api/auth/verify-email-change
+// @desc    Verify new email address
+// @access  Public
+router.get('/verify-email-change', async (req, res) => {
+  try {
+    const { token } = req.query;
+    
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification token is required'
+      });
+    }
+    
+    // Hash the token to match stored hash
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+    
+    // Find user with matching token that hasn't expired
+    const user = await User.findOne({
+      pendingEmailToken: hashedToken,
+      pendingEmailExpires: { $gt: Date.now() }
+    }).select('+pendingEmail +pendingEmailToken +pendingEmailExpires');
+    
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token'
+      });
+    }
+    
+    // Update email address
+    const oldEmail = user.email;
+    user.email = user.pendingEmail;
+    user.pendingEmail = undefined;
+    user.pendingEmailToken = undefined;
+    user.pendingEmailExpires = undefined;
+    await user.save();
+    
+    res.json({
+      success: true,
+      message: `Email successfully changed from ${oldEmail} to ${user.email}. Please log in with your new email address.`
+    });
+  } catch (error) {
+    console.error('Email change verification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error verifying email change'
+    });
+  }
+});
 
 module.exports = router;

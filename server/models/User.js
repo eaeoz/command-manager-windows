@@ -55,6 +55,18 @@ const userSchema = new mongoose.Schema({
     type: Date,
     select: false
   },
+  pendingEmail: {
+    type: String,
+    select: false
+  },
+  pendingEmailToken: {
+    type: String,
+    select: false
+  },
+  pendingEmailExpires: {
+    type: Date,
+    select: false
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -180,6 +192,22 @@ userSchema.methods.generateEmailVerificationToken = function() {
     .digest('hex');
   
   this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  
+  return token;
+};
+
+// Generate email change token
+userSchema.methods.generateEmailChangeToken = function(newEmail) {
+  const crypto = require('crypto');
+  const token = crypto.randomBytes(32).toString('hex');
+  
+  this.pendingEmail = newEmail;
+  this.pendingEmailToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+  
+  this.pendingEmailExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
   
   return token;
 };
