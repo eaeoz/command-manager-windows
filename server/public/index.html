@@ -270,28 +270,36 @@
                 <!-- Sync Page -->
                 <div class="page" id="syncPage">
                     <div class="sync-container">
-                        <h2>Synchronization</h2>
-                        <p>Keep your profiles and commands in sync across all devices</p>
+                        <h2>Device Sync Management</h2>
+                        <p>Push your cloud configuration to local devices</p>
                         
                         <div class="sync-stats">
                             <div class="sync-stat">
-                                <h4>Local</h4>
-                                <p><span id="localProfiles">0</span> profiles</p>
-                                <p><span id="localCommands">0</span> commands</p>
-                            </div>
-                            <div class="sync-arrow">⇄</div>
-                            <div class="sync-stat">
-                                <h4>Remote</h4>
+                                <h4>☁️ Cloud</h4>
                                 <p><span id="remoteProfiles">0</span> profiles</p>
                                 <p><span id="remoteCommands">0</span> commands</p>
+                                <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;">
+                                    Last synced: <span id="lastSyncTime">Never</span>
+                                </p>
                             </div>
                         </div>
 
-                        <div class="sync-actions">
-                            <button class="btn btn-primary btn-large" id="syncNowBtn">
-                                🔄 Sync Now
+                        <div class="devices-section" style="margin-top: 2rem;">
+                            <h3 style="margin-bottom: 1rem;">📱 Connected Devices</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Select devices to push your cloud configuration to them</p>
+                            
+                            <div class="devices-list" id="devicesList">
+                                <p class="loading">Loading devices...</p>
+                            </div>
+                        </div>
+
+                        <div class="sync-actions" style="margin-top: 2rem;">
+                            <button class="btn btn-primary btn-large" id="pushToDevicesBtn" disabled>
+                                ⬇️ Push to Selected Devices
                             </button>
-                            <p class="sync-info" id="syncInfo">Last synced: <span id="lastSyncTime">Never</span></p>
+                            <button class="btn btn-secondary" id="refreshDevicesBtn" style="margin-left: 1rem;">
+                                🔄 Refresh Devices
+                            </button>
                         </div>
                     </div>
                 </div>

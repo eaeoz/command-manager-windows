@@ -123,6 +123,18 @@ function setupEventListeners() {
   if (editCommandForm) {
     editCommandForm.addEventListener('submit', handleEditCommand);
   }
+  
+  // Push to devices button
+  const pushToDevicesBtn = document.getElementById('pushToDevicesBtn');
+  if (pushToDevicesBtn) {
+    pushToDevicesBtn.addEventListener('click', pushToDevices);
+  }
+  
+  // Refresh devices button
+  const refreshDevicesBtn = document.getElementById('refreshDevicesBtn');
+  if (refreshDevicesBtn) {
+    refreshDevicesBtn.addEventListener('click', refreshDevices);
+  }
 }
 
 // Authentication
@@ -537,11 +549,138 @@ async function loadSyncData() {
       document.getElementById('lastSyncTime').textContent = lastSync;
     }
     
-    // Set local counts
-    document.getElementById('localProfiles').textContent = userConfig.profiles?.length || 0;
-    document.getElementById('localCommands').textContent = userConfig.commands?.length || 0;
+    // Load devices
+    await loadDevices();
   } catch (error) {
     showToast('Failed to load sync data', 'error');
+  }
+}
+
+async function loadDevices() {
+  try {
+    const response = await fetchAPI('/auth/devices');
+    
+    if (response.success) {
+      renderDevices(response.devices);
+    }
+  } catch (error) {
+    showToast('Failed to load devices', 'error');
+  }
+}
+
+function renderDevices(devices) {
+  const container = document.getElementById('devicesList');
+  
+  if (!devices || devices.length === 0) {
+    container.innerHTML = `
+      <div class="empty-devices">
+        <div class="icon">💻</div>
+        <h4>No Devices Connected</h4>
+        <p>No Electron apps are currently registered with your account.<br>Open the desktop app and login to see it here.</p>
+      </div>
+    `;
+    document.getElementById('pushToDevicesBtn').disabled = true;
+    return;
+  }
+  
+  container.innerHTML = devices.map(device => `
+    <div class="device-item">
+      <input type="checkbox" class="device-checkbox" value="${escapeHtml(device.deviceId)}" onchange="updatePushButton()">
+      <div class="device-item-icon">💻</div>
+      <div class="device-item-info">
+        <div class="device-item-name">${escapeHtml(device.deviceName)}</div>
+        <div class="device-item-details">Last seen: ${new Date(device.lastSeen).toLocaleString()}</div>
+      </div>
+      <div class="device-status ${device.online ? 'online' : 'offline'}">
+        <span class="device-status-dot"></span>
+        ${device.online ? 'Online' : 'Offline'}
+      </div>
+      <div class="device-item-actions">
+        <button class="btn-icon" onclick="removeDevice('${escapeHtml(device.deviceId)}')" title="Remove device">
+          🗑️
+        </button>
+      </div>
+    </div>
+  `).join('');
+  
+  updatePushButton();
+}
+
+function updatePushButton() {
+  const checkboxes = document.querySelectorAll('.device-checkbox:checked');
+  const btn = document.getElementById('pushToDevicesBtn');
+  btn.disabled = checkboxes.length === 0;
+  
+  if (checkboxes.length > 0) {
+    btn.textContent = `⬇️ Push to ${checkboxes.length} Device(s)`;
+  } else {
+    btn.textContent = '⬇️ Push to Selected Devices';
+  }
+}
+
+async function pushToDevices() {
+  const checkboxes = document.querySelectorAll('.device-checkbox:checked');
+  const deviceIds = Array.from(checkboxes).map(cb => cb.value);
+  
+  if (deviceIds.length === 0) {
+    showToast('Please select at least one device', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('pushToDevicesBtn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⬇️ Pushing...';
+  
+  try {
+    const response = await fetchAPI('/config/push-to-devices', {
+      method: 'POST',
+      body: JSON.stringify({ deviceIds })
+    });
+    
+    if (response.success) {
+      showToast(`Configuration pushed to ${deviceIds.length} device(s)!`, 'success');
+      
+      // Uncheck all boxes
+      checkboxes.forEach(cb => cb.checked = false);
+      updatePushButton();
+    }
+  } catch (error) {
+    showToast('Failed to push to devices: ' + error.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+async function removeDevice(deviceId) {
+  if (!confirm('Are you sure you want to remove this device?')) return;
+  
+  try {
+    await fetchAPI(`/auth/device/${deviceId}`, {
+      method: 'DELETE'
+    });
+    
+    showToast('Device removed successfully', 'success');
+    loadDevices();
+  } catch (error) {
+    showToast('Failed to remove device', 'error');
+  }
+}
+
+async function refreshDevices() {
+  const btn = document.getElementById('refreshDevicesBtn');
+  btn.disabled = true;
+  btn.textContent = '🔄 Refreshing...';
+  
+  try {
+    await loadDevices();
+    showToast('Devices refreshed', 'success');
+  } catch (error) {
+    showToast('Failed to refresh devices', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔄 Refresh Devices';
   }
 }
 
@@ -850,3 +989,5 @@ window.deleteProfile = deleteProfile;
 window.deleteCommand = deleteCommand;
 window.closeModal = closeModal;
 window.deleteAccount = deleteAccount;
+window.updatePushButton = updatePushButton;
+window.removeDevice = removeDevice;

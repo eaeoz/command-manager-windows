@@ -318,4 +318,171 @@ router.delete('/delete-account', auth, async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/register-device
+// @desc    Register a device (Electron app)
+// @access  Private
+router.post('/register-device', auth, async (req, res) => {
+  try {
+    const { deviceId, deviceName } = req.body;
+    
+    if (!deviceId || !deviceName) {
+      return res.status(400).json({
+        success: false,
+        message: 'Device ID and name are required'
+      });
+    }
+    
+    const user = await User.findById(req.userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    // Check if device already exists
+    const deviceIndex = user.devices.findIndex(d => d.deviceId === deviceId);
+    
+    if (deviceIndex > -1) {
+      // Update existing device
+      user.devices[deviceIndex].lastSeen = Date.now();
+      user.devices[deviceIndex].online = true;
+      user.devices[deviceIndex].deviceName = deviceName;
+    } else {
+      // Add new device
+      user.devices.push({
+        deviceId,
+        deviceName,
+        lastSeen: Date.now(),
+        online: true
+      });
+    }
+    
+    await user.save();
+    
+    res.json({
+      success: true,
+      message: 'Device registered successfully',
+      devices: user.devices
+    });
+  } catch (error) {
+    console.error('Register device error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error registering device'
+    });
+  }
+});
+
+// @route   GET /api/auth/devices
+// @desc    Get all registered devices
+// @access  Private
+router.get('/devices', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    // Mark devices as offline if not seen in last 5 minutes
+    const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+    user.devices.forEach(device => {
+      if (device.lastSeen < fiveMinutesAgo) {
+        device.online = false;
+      }
+    });
+    
+    await user.save();
+    
+    res.json({
+      success: true,
+      devices: user.devices
+    });
+  } catch (error) {
+    console.error('Get devices error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching devices'
+    });
+  }
+});
+
+// @route   POST /api/auth/heartbeat
+// @desc    Update device heartbeat (keep alive)
+// @access  Private
+router.post('/heartbeat', auth, async (req, res) => {
+  try {
+    const { deviceId } = req.body;
+    
+    if (!deviceId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Device ID is required'
+      });
+    }
+    
+    const user = await User.findById(req.userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    const device = user.devices.find(d => d.deviceId === deviceId);
+    
+    if (device) {
+      device.lastSeen = Date.now();
+      device.online = true;
+      await user.save();
+    }
+    
+    res.json({
+      success: true,
+      message: 'Heartbeat updated'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error updating heartbeat'
+    });
+  }
+});
+
+// @route   DELETE /api/auth/device/:deviceId
+// @desc    Remove a device
+// @access  Private
+router.delete('/device/:deviceId', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    user.devices = user.devices.filter(d => d.deviceId !== req.params.deviceId);
+    await user.save();
+    
+    res.json({
+      success: true,
+      message: 'Device removed successfully',
+      devices: user.devices
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error removing device'
+    });
+  }
+});
+
 module.exports = router;

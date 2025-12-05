@@ -653,6 +653,16 @@ async function handleSyncLogin(e) {
             state.authToken = data.token;
             state.userEmail = email;
             showNotification('Login successful!', 'success');
+            
+            // Register this device
+            await registerDevice();
+            
+            // Start heartbeat to keep device online
+            startHeartbeat();
+            
+            // Check for pending pushes from cloud
+            startPendingPushCheck();
+            
             showSyncSection();
             await loadCloudData();
             
@@ -664,6 +674,134 @@ async function handleSyncLogin(e) {
     } catch (error) {
         console.error('Login error:', error);
         showNotification('Failed to connect to server', 'error');
+    }
+}
+
+// Device Registration
+async function registerDevice() {
+    const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+    const os = require('os');
+    
+    // Create a unique device ID based on hostname and network
+    const deviceId = `${os.hostname()}-${os.platform()}-${Date.now()}`.replace(/[^a-zA-Z0-9-]/g, '-');
+    const deviceName = `${os.hostname()} (${os.platform()})`;
+    
+    // Store device ID for future use
+    state.deviceId = deviceId;
+    
+    try {
+        const response = await fetch(`${serverUrl}/api/auth/register-device`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${state.authToken}`
+            },
+            body: JSON.stringify({ deviceId, deviceName })
+        });
+        
+        if (response.ok) {
+            console.log('Device registered successfully');
+        }
+    } catch (error) {
+        console.error('Device registration error:', error);
+    }
+}
+
+// Heartbeat to keep device online
+function startHeartbeat() {
+    // Clear any existing heartbeat
+    if (state.heartbeatInterval) {
+        clearInterval(state.heartbeatInterval);
+    }
+    
+    // Send heartbeat every 2 minutes
+    state.heartbeatInterval = setInterval(async () => {
+        if (state.authToken && state.deviceId) {
+            const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+            
+            try {
+                await fetch(`${serverUrl}/api/auth/heartbeat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${state.authToken}`
+                    },
+                    body: JSON.stringify({ deviceId: state.deviceId })
+                });
+                console.log('Heartbeat sent');
+            } catch (error) {
+                console.error('Heartbeat error:', error);
+            }
+        }
+    }, 120000); // 2 minutes
+}
+
+// Check for pending pushes from cloud
+function startPendingPushCheck() {
+    // Clear any existing check
+    if (state.pendingPushInterval) {
+        clearInterval(state.pendingPushInterval);
+    }
+    
+    // Check every 30 seconds
+    state.pendingPushInterval = setInterval(async () => {
+        if (state.authToken && state.deviceId) {
+            await checkPendingPush();
+        }
+    }, 30000); // 30 seconds
+}
+
+async function checkPendingPush() {
+    const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+    
+    try {
+        const response = await fetch(`${serverUrl}/api/auth/devices`, {
+            headers: { 'Authorization': `Bearer ${state.authToken}` }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                const myDevice = data.devices.find(d => d.deviceId === state.deviceId);
+                
+                if (myDevice && myDevice.pendingPush && myDevice.pushData) {
+                    console.log('Pending push detected, applying configuration...');
+                    await applyPushedConfiguration(myDevice.pushData);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Pending push check error:', error);
+    }
+}
+
+async function applyPushedConfiguration(pushData) {
+    try {
+        const { profiles, commands } = pushData;
+        
+        // Apply to local storage
+        await fetch('/profiles/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profiles })
+        });
+        
+        await fetch('/commands/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ commands })
+        });
+        
+        // Reload local data
+        await loadProfiles();
+        await loadCommands();
+        renderCommands();
+        updateStats();
+        
+        showNotification('Configuration updated from cloud!', 'success');
+        console.log('Configuration applied successfully');
+    } catch (error) {
+        console.error('Apply configuration error:', error);
     }
 }
 
@@ -809,14 +947,25 @@ async function handleSyncPull() {
 }
 
 function handleSyncLogout() {
-    // Stop auto-refresh
+    // Stop all intervals
     if (state.syncRefreshInterval) {
         clearInterval(state.syncRefreshInterval);
         state.syncRefreshInterval = null;
     }
     
+    if (state.heartbeatInterval) {
+        clearInterval(state.heartbeatInterval);
+        state.heartbeatInterval = null;
+    }
+    
+    if (state.pendingPushInterval) {
+        clearInterval(state.pendingPushInterval);
+        state.pendingPushInterval = null;
+    }
+    
     state.authToken = null;
     state.userEmail = null;
+    state.deviceId = null;
     document.getElementById('syncEmail').value = '';
     document.getElementById('syncPassword').value = '';
     showLoginSection();

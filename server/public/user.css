@@ -966,3 +966,242 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 }
+
+/* Device List Styles */
+.devices-section {
+  margin-top: 32px;
+}
+
+.devices-section h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.devices-section > p {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  font-size: 15px;
+}
+
+.devices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.device-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.device-item:hover {
+  border-color: var(--primary);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.device-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.device-item-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.device-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.device-item-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.device-item-details {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.device-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.device-status.online {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.device-status.offline {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+}
+
+.device-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.device-item-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.device-item-actions .btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.device-item-actions .btn-icon:hover {
+  background: var(--danger);
+  color: white;
+  border-color: var(--danger);
+}
+
+.empty-devices {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-devices .icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-devices h4 {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.empty-devices p {
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+/* Select All Checkbox */
+.select-all-devices {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-color);
+}
+
+.select-all-devices input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.select-all-devices label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Sync Container Updates */
+.sync-container {
+  max-width: 800px;
+}
+
+.sync-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.sync-actions .btn {
+  flex-shrink: 0;
+}
+
+/* Loading State */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+/* Responsive for Devices */
+@media (max-width: 768px) {
+  .device-item {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .device-item-info {
+    flex: 1 1 100%;
+    order: 2;
+  }
+  
+  .device-status {
+    order: 3;
+  }
+  
+  .sync-actions {
+    flex-direction: column;
+  }
+  
+  .sync-actions .btn {
+    width: 100%;
+  }
+}

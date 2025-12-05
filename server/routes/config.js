@@ -189,4 +189,77 @@ router.put('/commands', protect, async (req, res) => {
   }
 });
 
+// @route   POST /api/config/push-to-devices
+// @desc    Push cloud configuration to selected local devices
+// @access  Private
+router.post('/push-to-devices', protect, async (req, res) => {
+  try {
+    const { deviceIds } = req.body;
+
+    if (!deviceIds || !Array.isArray(deviceIds) || deviceIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Device IDs array is required'
+      });
+    }
+
+    // Get cloud configuration
+    const config = await Configuration.findOne({ userId: req.user._id });
+
+    if (!config) {
+      return res.status(404).json({
+        success: false,
+        message: 'Configuration not found'
+      });
+    }
+
+    // In a real implementation, you would:
+    // 1. Use WebSockets or Server-Sent Events to push to devices
+    // 2. Or store push requests in database for devices to poll
+    // For now, we'll store a "pending push" that devices can check
+    
+    const User = require('../models/User');
+    const user = await User.findById(req.user._id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Mark selected devices as having pending updates
+    deviceIds.forEach(deviceId => {
+      const device = user.devices.find(d => d.deviceId === deviceId);
+      if (device) {
+        device.pendingPush = true;
+        device.pushData = {
+          profiles: config.profiles,
+          commands: config.commands,
+          timestamp: Date.now()
+        };
+      }
+    });
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Configuration queued for push to ${deviceIds.length} device(s)`,
+      data: {
+        profileCount: config.getProfileCount(),
+        commandCount: config.getCommandCount(),
+        deviceCount: deviceIds.length
+      }
+    });
+  } catch (error) {
+    console.error('Push to devices error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error pushing to devices',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;

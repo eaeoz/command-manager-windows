@@ -50,7 +50,46 @@ const userSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  devices: [{
+    deviceId: {
+      type: String,
+      required: true
+    },
+    deviceName: {
+      type: String,
+      required: true
+    },
+    lastSeen: {
+      type: Date,
+      default: Date.now
+    },
+    online: {
+      type: Boolean,
+      default: true
+    },
+    pendingPush: {
+      type: Boolean,
+      default: false
+    },
+    pushData: {
+      profiles: [{
+        title: String,
+        host: String,
+        username: String,
+        password: String,
+        port: Number
+      }],
+      commands: [{
+        lineNumber: Number,
+        title: String,
+        command: String,
+        profile: String,
+        url: String
+      }],
+      timestamp: Date
+    }
+  }]
 });
 
 // Indexes are defined in schema fields with unique: true
