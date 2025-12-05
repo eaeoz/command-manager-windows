@@ -27,18 +27,8 @@ async function checkSettings() {
       
       // Check maintenance mode
       if (settings.maintenanceMode) {
-        // Show maintenance page
-        document.getElementById('authScreen').innerHTML = `
-          <div class="auth-container">
-            <div class="auth-header" style="text-align: center;">
-              <h1 style="font-size: 3rem; margin-bottom: 1rem;">🔧</h1>
-              <h1>Site Under Maintenance</h1>
-              <p style="margin-top: 1rem;">We're currently performing scheduled maintenance.</p>
-              <p style="margin-top: 0.5rem;">Please check back soon!</p>
-            </div>
-          </div>
-        `;
-        // Don't proceed with normal initialization
+        // Redirect to maintenance page
+        window.location.href = '/maintenance.html';
         return;
       }
       
