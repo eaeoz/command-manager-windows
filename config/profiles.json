@@ -8,11 +8,10 @@
     "_id": "6932389fb18dbec4d41a31e7"
   },
   {
-    "title": "Profile 22",
-    "host": "192.168.10.12",
-    "username": "user2",
-    "password": "password2",
-    "port": 22,
-    "_id": "6932389fb18dbec4d41a31e8"
+    "title": "test profilei",
+    "username": "test ",
+    "password": "testtest",
+    "host": "192.168.1.1",
+    "port": "22"
   }
 ]

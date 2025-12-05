@@ -341,19 +341,37 @@ async function loadPageData(page) {
 // Overview Page
 async function loadOverviewData() {
   try {
+    // Show loading state
+    const profileCount = document.getElementById('profileCount');
+    const commandCount = document.getElementById('commandCount');
+    const lastSync = document.getElementById('lastSync');
+    
+    profileCount.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    commandCount.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    lastSync.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    // Fetch fresh data from API
     const response = await fetchAPI('/config');
     
     if (response.success) {
       userConfig = response.data;
-      document.getElementById('profileCount').textContent = response.data.profileCount;
-      document.getElementById('commandCount').textContent = response.data.commandCount;
       
-      const lastSync = response.data.lastSyncedAt ? 
-        new Date(response.data.lastSyncedAt).toLocaleString() : 'Never';
-      document.getElementById('lastSync').textContent = lastSync;
+      // Update statistics with animation
+      setTimeout(() => {
+        profileCount.textContent = response.data.profileCount || 0;
+        commandCount.textContent = response.data.commandCount || 0;
+        
+        const lastSyncText = response.data.lastSyncedAt ? 
+          new Date(response.data.lastSyncedAt).toLocaleString() : 'Never';
+        lastSync.textContent = lastSyncText;
+      }, 300);
     }
   } catch (error) {
     showToast('Failed to load overview data', 'error');
+    // Reset to previous values on error
+    document.getElementById('profileCount').textContent = userConfig.profileCount || '0';
+    document.getElementById('commandCount').textContent = userConfig.commandCount || '0';
+    document.getElementById('lastSync').textContent = 'Error loading';
   }
 }
 

@@ -234,104 +234,264 @@
 /* Profiles Grid */
 .profiles-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
 }
 
 .profile-card {
   background: var(--bg-primary);
-  padding: 24px;
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  transition: all 0.2s ease;
+  padding: 28px;
+  border-radius: 16px;
+  border: 2px solid var(--border-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.profile-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
 }
 
 .profile-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px var(--shadow);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  border-color: var(--primary);
+}
+
+.profile-card:hover::before {
+  transform: scaleX(1);
 }
 
 .profile-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  gap: 12px;
 }
 
 .profile-card-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  background: linear-gradient(135deg, var(--text-primary), var(--primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .profile-card-host {
   font-size: 14px;
   color: var(--text-secondary);
-  font-family: monospace;
+  font-family: 'Courier New', monospace;
+  background: var(--bg-secondary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-top: 4px;
 }
 
 .profile-card-actions {
   display: flex;
-  gap: 8px;
-  margin-top: 16px;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.profile-card-actions .btn {
+  flex: 1;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.profile-card-actions .btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+}
+
+.profile-card-actions .btn-secondary:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.profile-card-actions .btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 /* Commands List */
 .commands-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .command-card {
   background: var(--bg-primary);
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  transition: all 0.2s ease;
+  padding: 24px;
+  border-radius: 16px;
+  border: 2px solid var(--border-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.command-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #10b981, #3b82f6);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
 }
 
 .command-card:hover {
   border-color: var(--primary);
-  box-shadow: 0 4px 12px var(--shadow);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px);
+}
+
+.command-card:hover::before {
+  transform: scaleX(1);
 }
 
 .command-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  gap: 16px;
 }
 
 .command-card-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: var(--text-primary);
+  line-height: 1.4;
+  flex: 1;
+  background: linear-gradient(135deg, var(--text-primary), #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .command-card-command {
   background: var(--bg-secondary);
-  padding: 12px;
-  border-radius: 8px;
+  padding: 16px 18px;
+  border-radius: 12px;
   font-family: 'Courier New', monospace;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-primary);
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   word-break: break-all;
+  line-height: 1.6;
+  border: 1px solid var(--border-color);
+  position: relative;
+}
+
+.command-card-command::before {
+  content: '$';
+  position: absolute;
+  left: 0;
+  top: 16px;
+  color: var(--primary);
+  font-weight: 700;
 }
 
 .command-card-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.command-card-meta span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.command-card-meta a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--primary);
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.command-card-meta a:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-2px);
 }
 
 .command-card-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.command-card-actions .btn {
+  flex: 1;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.command-card-actions .btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+}
+
+.command-card-actions .btn-secondary:hover {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.command-card-actions .btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 /* Sync Container */
@@ -580,6 +740,163 @@ textarea:focus {
   margin-bottom: 16px;
 }
 
+/* Add Section Styling */
+.add-section {
+  background: var(--bg-primary);
+  padding: 32px;
+  border-radius: 16px;
+  border: 2px solid var(--border-color);
+  margin-bottom: 32px;
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: all 0.3s ease;
+}
+
+.add-section:hover {
+  box-shadow: 0 8px 24px var(--shadow);
+  border-color: var(--primary);
+}
+
+.add-section h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.add-section h3 i {
+  color: var(--primary);
+  font-size: 24px;
+}
+
+.add-section form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.add-section .form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.add-section .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.add-section .form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.add-section .form-group label i {
+  color: var(--primary);
+  font-size: 14px;
+}
+
+.add-section .form-group input,
+.add-section .form-group select,
+.add-section .form-group textarea {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 15px;
+  border-radius: 10px;
+  border: 2px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.add-section .form-group input:focus,
+.add-section .form-group select:focus,
+.add-section .form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  transform: translateY(-2px);
+}
+
+.add-section .form-group textarea {
+  font-family: 'Courier New', monospace;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.add-section .btn-submit {
+  margin-top: 8px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  align-self: flex-start;
+  min-width: 200px;
+}
+
+.add-section .btn-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+}
+
+.add-section .btn-submit:active {
+  transform: translateY(-1px);
+}
+
+.add-section .btn-submit i {
+  font-size: 18px;
+}
+
+/* Form Helper Text */
+.form-helper {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-helper i {
+  font-size: 12px;
+}
+
+/* Input Icons */
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon i {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.input-with-icon input {
+  padding-left: 44px;
+}
+
 /* Modal Improvements */
 .modal {
   position: fixed;
@@ -604,7 +921,7 @@ textarea:focus {
 .modal-content {
   background: var(--bg-primary);
   border-radius: 20px;
-  max-width: 600px;
+  max-width: 700px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
@@ -1438,6 +1755,26 @@ textarea:focus {
   /* Config grid mobile */
   .config-grid {
     grid-template-columns: 1fr;
+  }
+  
+  /* Add section mobile */
+  .add-section {
+    padding: 20px;
+  }
+  
+  .add-section h3 {
+    font-size: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .add-section .form-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .add-section .btn-submit {
+    width: 100%;
+    min-width: auto;
   }
 }
 
