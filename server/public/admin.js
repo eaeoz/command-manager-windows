@@ -177,7 +177,8 @@ function switchPage(pageName) {
   const titles = {
     overview: 'Overview',
     users: 'User Management',
-    configurations: 'Configuration Management'
+    configurations: 'Configuration Management',
+    settings: 'Site Settings'
   };
   document.getElementById('pageTitle').textContent = titles[pageName];
   
@@ -195,6 +196,9 @@ async function loadPageData(page) {
       break;
     case 'configurations':
       await loadConfigurationsData();
+      break;
+    case 'settings':
+      await loadSettingsData();
       break;
   }
 }
@@ -546,8 +550,88 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// Settings Page
+async function loadSettingsData() {
+  try {
+    const response = await fetchAPI('/settings');
+    
+    if (response.success) {
+      const settings = response.data;
+      
+      // Site Information
+      document.getElementById('siteName').value = settings.siteName || '';
+      document.getElementById('siteDescription').value = settings.siteDescription || '';
+      document.getElementById('siteUrl').value = settings.siteUrl || '';
+      
+      // SEO Settings
+      document.getElementById('seoTitle').value = settings.seoTitle || '';
+      document.getElementById('seoDescription').value = settings.seoDescription || '';
+      document.getElementById('seoKeywords').value = settings.seoKeywords || '';
+      
+      // Social Links
+      document.getElementById('facebookUrl').value = settings.facebookUrl || '';
+      document.getElementById('twitterUrl').value = settings.twitterUrl || '';
+      document.getElementById('linkedinUrl').value = settings.linkedinUrl || '';
+      document.getElementById('githubUrl').value = settings.githubUrl || '';
+      
+      // Contact Information
+      document.getElementById('contactEmail').value = settings.contactEmail || '';
+      document.getElementById('supportEmail').value = settings.supportEmail || '';
+      
+      // System Settings
+      document.getElementById('maintenanceMode').checked = settings.maintenanceMode || false;
+      document.getElementById('allowRegistration').checked = settings.allowRegistration !== false;
+    }
+  } catch (error) {
+    showToast('Failed to load settings', 'error');
+  }
+}
+
+async function saveSettings() {
+  try {
+    const settingsData = {
+      // Site Information
+      siteName: document.getElementById('siteName').value,
+      siteDescription: document.getElementById('siteDescription').value,
+      siteUrl: document.getElementById('siteUrl').value,
+      
+      // SEO Settings
+      seoTitle: document.getElementById('seoTitle').value,
+      seoDescription: document.getElementById('seoDescription').value,
+      seoKeywords: document.getElementById('seoKeywords').value,
+      
+      // Social Links
+      facebookUrl: document.getElementById('facebookUrl').value,
+      twitterUrl: document.getElementById('twitterUrl').value,
+      linkedinUrl: document.getElementById('linkedinUrl').value,
+      githubUrl: document.getElementById('githubUrl').value,
+      
+      // Contact Information
+      contactEmail: document.getElementById('contactEmail').value,
+      supportEmail: document.getElementById('supportEmail').value,
+      
+      // System Settings
+      maintenanceMode: document.getElementById('maintenanceMode').checked,
+      allowRegistration: document.getElementById('allowRegistration').checked
+    };
+    
+    const response = await fetchAPI('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settingsData)
+    });
+    
+    if (response.success) {
+      showToast('Settings saved successfully!', 'success');
+    }
+  } catch (error) {
+    showToast(error.message || 'Failed to save settings', 'error');
+  }
+}
+
 // Make functions global
 window.editUser = editUser;
 window.deleteUser = deleteUser;
 window.viewConfiguration = viewConfiguration;
 window.closeModal = closeModal;
+window.loadSettingsData = loadSettingsData;
+window.saveSettings = saveSettings;

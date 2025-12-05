@@ -53,6 +53,10 @@
                         <span class="icon">⚙️</span>
                         <span>Configurations</span>
                     </a>
+                    <a href="#" class="nav-item" data-page="settings">
+                        <span class="icon">🔧</span>
+                        <span>Settings</span>
+                    </a>
                 </nav>
                 <div class="sidebar-footer">
                     <div class="theme-toggle">
@@ -164,6 +168,108 @@
                     <div class="config-grid" id="configGrid">
                         <p class="loading">Loading configurations...</p>
                     </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div class="page" id="settingsPage">
+                    <div class="page-header">
+                        <h2>Site Settings</h2>
+                        <button class="btn btn-primary" onclick="saveSettings()">💾 Save All Changes</button>
+                    </div>
+                    
+                    <form id="settingsForm" class="settings-container">
+                        <!-- Site Information -->
+                        <div class="settings-section">
+                            <h3>📝 Site Information</h3>
+                            <div class="form-group">
+                                <label for="siteName">Site Name</label>
+                                <input type="text" id="siteName" placeholder="Command Manager">
+                            </div>
+                            <div class="form-group">
+                                <label for="siteDescription">Site Description</label>
+                                <textarea id="siteDescription" rows="3" placeholder="Manage your SSH commands and profiles from anywhere"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="siteUrl">Site URL</label>
+                                <input type="url" id="siteUrl" placeholder="https://commandmanager.com">
+                            </div>
+                        </div>
+
+                        <!-- SEO Settings -->
+                        <div class="settings-section">
+                            <h3>🔍 SEO Settings</h3>
+                            <div class="form-group">
+                                <label for="seoTitle">SEO Title</label>
+                                <input type="text" id="seoTitle" placeholder="Command Manager - SSH Command Management">
+                            </div>
+                            <div class="form-group">
+                                <label for="seoDescription">SEO Description</label>
+                                <textarea id="seoDescription" rows="3" placeholder="Manage your SSH commands and profiles efficiently"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="seoKeywords">SEO Keywords (comma-separated)</label>
+                                <input type="text" id="seoKeywords" placeholder="ssh, command manager, terminal, devops">
+                            </div>
+                        </div>
+
+                        <!-- Social Links -->
+                        <div class="settings-section">
+                            <h3>🌐 Social Media Links</h3>
+                            <div class="form-group">
+                                <label for="facebookUrl">Facebook URL</label>
+                                <input type="url" id="facebookUrl" placeholder="https://facebook.com/yourpage">
+                            </div>
+                            <div class="form-group">
+                                <label for="twitterUrl">Twitter/X URL</label>
+                                <input type="url" id="twitterUrl" placeholder="https://twitter.com/yourhandle">
+                            </div>
+                            <div class="form-group">
+                                <label for="linkedinUrl">LinkedIn URL</label>
+                                <input type="url" id="linkedinUrl" placeholder="https://linkedin.com/company/yourcompany">
+                            </div>
+                            <div class="form-group">
+                                <label for="githubUrl">GitHub URL</label>
+                                <input type="url" id="githubUrl" placeholder="https://github.com/yourusername">
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="settings-section">
+                            <h3>📧 Contact Information</h3>
+                            <div class="form-group">
+                                <label for="contactEmail">Contact Email</label>
+                                <input type="email" id="contactEmail" placeholder="contact@commandmanager.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="supportEmail">Support Email</label>
+                                <input type="email" id="supportEmail" placeholder="support@commandmanager.com">
+                            </div>
+                        </div>
+
+                        <!-- System Settings -->
+                        <div class="settings-section">
+                            <h3>⚙️ System Settings</h3>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="maintenanceMode">
+                                    <span>Maintenance Mode</span>
+                                </label>
+                                <small style="color: var(--text-secondary); display: block; margin-top: 4px;">Enable to temporarily disable site access</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="allowRegistration">
+                                    <span>Allow New User Registrations</span>
+                                </label>
+                                <small style="color: var(--text-secondary); display: block; margin-top: 4px;">Disable to prevent new users from signing up</small>
+                            </div>
+                        </div>
+
+                        <div class="settings-actions">
+                            <button type="button" class="btn btn-secondary" onclick="loadSettingsData()">🔄 Reset Changes</button>
+                            <button type="button" class="btn btn-primary" onclick="saveSettings()">💾 Save All Changes</button>
+                        </div>
+                    </form>
                 </div>
             </main>
         </div>

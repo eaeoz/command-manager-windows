@@ -96,6 +96,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/config', require('./routes/config'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/contact', require('./routes/contact'));
+app.use('/api/settings', require('./routes/settings'));
 
 // Serve admin panel static files
 app.use(express.static(path.join(__dirname, 'public')));
