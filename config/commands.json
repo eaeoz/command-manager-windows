@@ -5,5 +5,12 @@
     "command": "ping -c 6 google.com",
     "url": "https://google.com",
     "profile": "media"
+  },
+  {
+    "lineNumber": 2,
+    "title": "show hostanme",
+    "command": "hostname",
+    "url": "",
+    "profile": "media"
   }
 ]
