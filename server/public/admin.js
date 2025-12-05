@@ -56,9 +56,25 @@ function setupEventListeners() {
   });
   
   // Refresh button
-  document.getElementById('refreshBtn').addEventListener('click', () => {
+  document.getElementById('refreshBtn').addEventListener('click', async () => {
     const activePage = document.querySelector('.nav-item.active').dataset.page;
-    loadPageData(activePage);
+    const refreshBtn = document.getElementById('refreshBtn');
+    
+    // Disable button and show loading state
+    refreshBtn.disabled = true;
+    const originalHTML = refreshBtn.innerHTML;
+    refreshBtn.innerHTML = '⏳ Refreshing...';
+    
+    try {
+      await loadPageData(activePage);
+      showToast('Data refreshed successfully!', 'success');
+    } catch (error) {
+      showToast('Failed to refresh data', 'error');
+    } finally {
+      // Re-enable button and restore original text
+      refreshBtn.disabled = false;
+      refreshBtn.innerHTML = originalHTML;
+    }
   });
   
   // Edit user form
