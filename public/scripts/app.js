@@ -28,6 +28,19 @@ async function initializeApp() {
 
 // Event Listeners
 function setupEventListeners() {
+    // Window controls
+    document.getElementById('minimizeBtn').addEventListener('click', () => {
+        ipcRenderer.send('window-minimize');
+    });
+    
+    document.getElementById('maximizeBtn').addEventListener('click', () => {
+        ipcRenderer.send('window-maximize');
+    });
+    
+    document.getElementById('closeBtn').addEventListener('click', () => {
+        ipcRenderer.send('window-close');
+    });
+    
     // Header buttons
     document.getElementById('profilesBtn').addEventListener('click', () => openModal('profileModal'));
     document.getElementById('addCommandBtn').addEventListener('click', () => openCommandModal('add'));

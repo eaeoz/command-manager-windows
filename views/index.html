@@ -25,9 +25,17 @@
                 <button class="btn-icon" onclick="openDashboard()" title="Open Web Dashboard">
                     <i class="fas fa-cloud"></i>
                 </button>
-                <button class="btn-icon btn-close" onclick="window.close()" title="Close">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div class="window-controls">
+                    <button class="btn-icon btn-minimize" id="minimizeBtn" title="Minimize">
+                        <i class="fas fa-window-minimize"></i>
+                    </button>
+                    <button class="btn-icon btn-maximize" id="maximizeBtn" title="Maximize">
+                        <i class="fas fa-window-maximize"></i>
+                    </button>
+                    <button class="btn-icon btn-close" id="closeBtn" title="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
