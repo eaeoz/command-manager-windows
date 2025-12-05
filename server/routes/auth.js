@@ -389,19 +389,23 @@ router.get('/devices', auth, async (req, res) => {
       });
     }
     
+    // Get user's configuration to count profiles and commands
+    const config = await Configuration.findOne({ userId: req.userId });
+    const profileCount = config ? config.profiles.length : 0;
+    const commandCount = config ? config.commands.length : 0;
+    
     // Mark devices as offline if not seen in last 5 minutes
     const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
-    user.devices.forEach(device => {
-      if (device.lastSeen < fiveMinutesAgo) {
-        device.online = false;
-      }
-    });
-    
-    await user.save();
+    const devicesWithStats = user.devices.map(device => ({
+      ...device.toObject(),
+      online: device.lastSeen >= fiveMinutesAgo,
+      profileCount,
+      commandCount
+    }));
     
     res.json({
       success: true,
-      devices: user.devices
+      devices: devicesWithStats
     });
   } catch (error) {
     console.error('Get devices error:', error);

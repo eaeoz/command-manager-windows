@@ -589,7 +589,13 @@ function renderDevices(devices) {
       <div class="device-item-icon">💻</div>
       <div class="device-item-info">
         <div class="device-item-name">${escapeHtml(device.deviceName)}</div>
-        <div class="device-item-details">Last seen: ${new Date(device.lastSeen).toLocaleString()}</div>
+        <div class="device-item-details">
+          <span style="margin-right: 12px;">💾 ${device.profileCount || 0} profiles</span>
+          <span style="margin-right: 12px;">⌨️ ${device.commandCount || 0} commands</span>
+        </div>
+        <div class="device-item-details" style="margin-top: 4px; font-size: 12px;">
+          Last seen: ${new Date(device.lastSeen).toLocaleString()}
+        </div>
       </div>
       <div class="device-status ${device.online ? 'online' : 'offline'}">
         <span class="device-status-dot"></span>
