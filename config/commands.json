@@ -12,5 +12,26 @@
     "command": "ping google.com",
     "url": "https://google.com",
     "profile": "Profile 1"
+  },
+  {
+    "lineNumber": 3,
+    "title": "test 3",
+    "command": "ping twitch.com",
+    "url": "https://twitch.com",
+    "profile": "Profile 2"
+  },
+  {
+    "lineNumber": 4,
+    "title": "test 4",
+    "command": "ping mynet.com",
+    "url": "https://mynet.com",
+    "profile": "Profile 1"
+  },
+  {
+    "lineNumber": 5,
+    "title": "test5",
+    "command": "ping netcify.netlify.app",
+    "url": "https://netcify.netlify.app",
+    "profile": "Profile 1"
   }
 ]

@@ -1360,7 +1360,7 @@ border-top: none;
 
 // Function to log errors
 function logError(message) {
-    const logMessage = `${new Date().toISOString()} - ERROR: ${message}\n`;
+    let logMessage = `${new Date().toISOString()} - ERROR: ${message}\n`;
 
     // If the message is an Error object, include the stack trace
     if (message instanceof Error) {

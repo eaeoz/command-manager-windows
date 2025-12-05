@@ -9,7 +9,8 @@ const state = {
     filteredCommands: [],
     authToken: null,
     userEmail: null,
-    lastSync: null
+    lastSync: null,
+    syncRefreshInterval: null
 };
 
 // Initialize App
@@ -89,6 +90,12 @@ function openModal(modalId) {
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     modal.classList.remove('active');
+    
+    // Stop auto-refresh when sync modal closes
+    if (modalId === 'syncModal' && state.syncRefreshInterval) {
+        clearInterval(state.syncRefreshInterval);
+        state.syncRefreshInterval = null;
+    }
     
     // Reset forms
     if (modalId === 'profileModal') {
@@ -585,11 +592,29 @@ async function openSyncModal() {
     if (state.authToken) {
         showSyncSection();
         await loadCloudData();
+        
+        // Start auto-refresh every 10 seconds
+        startSyncRefresh();
     } else {
         showLoginSection();
     }
     
     openModal('syncModal');
+}
+
+function startSyncRefresh() {
+    // Clear any existing interval
+    if (state.syncRefreshInterval) {
+        clearInterval(state.syncRefreshInterval);
+    }
+    
+    // Refresh cloud data every 10 seconds
+    state.syncRefreshInterval = setInterval(async () => {
+        if (state.authToken) {
+            await loadCloudData();
+            console.log('Auto-refreshed cloud data');
+        }
+    }, 10000); // 10 seconds
 }
 
 function showLoginSection() {
@@ -630,6 +655,9 @@ async function handleSyncLogin(e) {
             showNotification('Login successful!', 'success');
             showSyncSection();
             await loadCloudData();
+            
+            // Start auto-refresh after login
+            startSyncRefresh();
         } else {
             showNotification(data.message || 'Login failed', 'error');
         }
@@ -643,22 +671,18 @@ async function loadCloudData() {
     const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
     
     try {
-        // Load cloud profiles
-        const profilesResponse = await fetch(`${serverUrl}/api/config/profiles`, {
+        // Get full config from single endpoint
+        const response = await fetch(`${serverUrl}/api/config`, {
             headers: { 'Authorization': `Bearer ${state.authToken}` }
         });
         
-        // Load cloud commands
-        const commandsResponse = await fetch(`${serverUrl}/api/config/commands`, {
-            headers: { 'Authorization': `Bearer ${state.authToken}` }
-        });
-        
-        if (profilesResponse.ok && commandsResponse.ok) {
-            const cloudProfiles = await profilesResponse.json();
-            const cloudCommands = await commandsResponse.json();
-            
-            document.getElementById('cloudProfiles').textContent = cloudProfiles.length;
-            document.getElementById('cloudCommands').textContent = cloudCommands.length;
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Cloud data loaded:', data);
+            if (data.success && data.data) {
+                document.getElementById('cloudProfiles').textContent = data.data.profileCount || 0;
+                document.getElementById('cloudCommands').textContent = data.data.commandCount || 0;
+            }
         }
     } catch (error) {
         console.error('Error loading cloud data:', error);
@@ -677,37 +701,37 @@ async function handleSyncPush() {
     syncBtn.disabled = true;
     syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Pushing...';
     
+    console.log('Pushing data:', { profiles: state.profiles, commands: state.commands });
+    
     try {
-        // Push profiles
-        const profilesResponse = await fetch(`${serverUrl}/api/config/profiles`, {
-            method: 'PUT',
+        // Use the sync endpoint with proper format
+        const syncResponse = await fetch(`${serverUrl}/api/config/sync`, {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${state.authToken}`
             },
-            body: JSON.stringify(state.profiles)
+            body: JSON.stringify({
+                profiles: state.profiles,
+                commands: state.commands
+            })
         });
         
-        // Push commands
-        const commandsResponse = await fetch(`${serverUrl}/api/config/commands`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${state.authToken}`
-            },
-            body: JSON.stringify(state.commands)
-        });
+        const data = await syncResponse.json();
+        console.log('Push response:', data);
         
-        if (profilesResponse.ok && commandsResponse.ok) {
+        if (syncResponse.ok && data.success) {
             state.lastSync = new Date().toLocaleString();
             showNotification('Successfully pushed to cloud!', 'success');
             await loadCloudData();
+            document.getElementById('lastSyncTime').textContent = state.lastSync;
         } else {
-            showNotification('Failed to push data', 'error');
+            showNotification(data.message || 'Failed to push data', 'error');
+            console.error('Push error:', data);
         }
     } catch (error) {
         console.error('Sync push error:', error);
-        showNotification('Sync failed', 'error');
+        showNotification('Sync failed: ' + error.message, 'error');
     } finally {
         syncBtn.disabled = false;
         syncBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Push to Cloud (Local → Cloud)';
@@ -726,45 +750,58 @@ async function handleSyncPull() {
     syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Pulling...';
     
     try {
-        // Get cloud data
-        const profilesResponse = await fetch(`${serverUrl}/api/config/profiles`, {
+        // Get cloud data from config endpoint
+        const response = await fetch(`${serverUrl}/api/config`, {
             headers: { 'Authorization': `Bearer ${state.authToken}` }
         });
         
-        const commandsResponse = await fetch(`${serverUrl}/api/config/commands`, {
-            headers: { 'Authorization': `Bearer ${state.authToken}` }
-        });
-        
-        if (profilesResponse.ok && commandsResponse.ok) {
-            const cloudProfiles = await profilesResponse.json();
-            const cloudCommands = await commandsResponse.json();
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Pull data:', data);
             
-            // Save to local
-            await fetch('/profiles/sync', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ profiles: cloudProfiles })
-            });
-            
-            await fetch('/commands/sync', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ commands: cloudCommands })
-            });
-            
-            state.lastSync = new Date().toLocaleString();
-            showNotification('Successfully pulled from cloud!', 'success');
-            
-            // Reload local data
-            await loadProfiles();
-            await loadCommands();
-            await loadCloudData();
+            if (data.success && data.data) {
+                const cloudProfiles = data.data.profiles || [];
+                const cloudCommands = data.data.commands || [];
+                
+                // Save to local using sync endpoints
+                await fetch('/profiles/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profiles: cloudProfiles })
+                });
+                
+                await fetch('/commands/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ commands: cloudCommands })
+                });
+                
+                state.lastSync = new Date().toLocaleString();
+                showNotification('Successfully pulled from cloud!', 'success');
+                document.getElementById('lastSyncTime').textContent = state.lastSync;
+                
+                // Reload local data to update state
+                await loadProfiles();
+                await loadCommands();
+                
+                // Update the UI with new local counts
+                document.getElementById('localProfiles').textContent = state.profiles.length;
+                document.getElementById('localCommands').textContent = state.commands.length;
+                
+                // Reload cloud data
+                await loadCloudData();
+                
+                // Re-render the main UI
+                renderCommands();
+                updateStats();
+            }
         } else {
-            showNotification('Failed to pull data', 'error');
+            const errorData = await response.json();
+            showNotification(errorData.message || 'Failed to pull data', 'error');
         }
     } catch (error) {
         console.error('Sync pull error:', error);
-        showNotification('Sync failed', 'error');
+        showNotification('Sync failed: ' + error.message, 'error');
     } finally {
         syncBtn.disabled = false;
         syncBtn.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Pull from Cloud (Cloud → Local)';
@@ -772,6 +809,12 @@ async function handleSyncPull() {
 }
 
 function handleSyncLogout() {
+    // Stop auto-refresh
+    if (state.syncRefreshInterval) {
+        clearInterval(state.syncRefreshInterval);
+        state.syncRefreshInterval = null;
+    }
+    
     state.authToken = null;
     state.userEmail = null;
     document.getElementById('syncEmail').value = '';
