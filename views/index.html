@@ -108,14 +108,39 @@
                 <i class="fas fa-terminal"></i>
                 <span>Output Console</span>
             </div>
-            <button class="btn-icon" id="clearConsole" title="Clear Console">
-                <i class="fas fa-eraser"></i>
-            </button>
+            <div>
+                <button class="btn-icon" id="expandConsole" title="Expand Output">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button class="btn-icon" id="copyConsole" title="Copy Output">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button class="btn-icon" id="clearConsole" title="Clear Console">
+                    <i class="fas fa-eraser"></i>
+                </button>
+            </div>
         </div>
         <div class="console-content" id="consoleOutput">
             <div class="console-placeholder">
                 <i class="fas fa-info-circle"></i>
                 <p>Command output will appear here</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Output Modal -->
+    <div class="modal" id="outputModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Command Output</h2>
+                <button class="btn-icon" id="closeOutputModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="console-content" id="modalConsoleOutput" style="max-height: 60vh; overflow-y: auto; background: var(--bg-secondary); padding: 1rem; border-radius: 8px; font-family: 'Courier New', monospace;">
+                    <!-- Output will be copied here -->
+                </div>
             </div>
         </div>
     </div>

@@ -72,6 +72,9 @@ function setupEventListeners() {
     
     // Console
     document.getElementById('clearConsole').addEventListener('click', clearConsole);
+    document.getElementById('copyConsole').addEventListener('click', copyConsoleOutput);
+    document.getElementById('expandConsole').addEventListener('click', expandConsoleOutput);
+    document.getElementById('closeOutputModal').addEventListener('click', () => closeModal('outputModal'));
     
     // Search
     document.getElementById('searchInput').addEventListener('input', handleSearch);
@@ -570,9 +573,15 @@ function showConsoleOutput(text, append = true) {
     if (placeholder) {
         placeholder.remove();
     }
-    const line = document.createElement('div');
-    line.textContent = text;
-    console.appendChild(line);
+    
+    // Split text by newlines and create a div for each line
+    const lines = text.split('\n');
+    lines.forEach(lineText => {
+        const line = document.createElement('div');
+        line.textContent = lineText || '\u00A0'; // Use non-breaking space for empty lines
+        console.appendChild(line);
+    });
+    
     console.scrollTop = console.scrollHeight;
 }
 
@@ -1026,6 +1035,48 @@ async function handleSyncLogout() {
     showNotification('Logged out successfully', 'success');
 }
 
+// Console Functions
+function copyConsoleOutput() {
+    const consoleOutput = document.getElementById('consoleOutput');
+    const text = Array.from(consoleOutput.querySelectorAll('div:not(.console-placeholder)'))
+        .map(div => div.textContent)
+        .join('\n');
+    
+    if (!text) {
+        showNotification('No output to copy', 'error');
+        return;
+    }
+    
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('Output copied to clipboard!', 'success');
+    }).catch(err => {
+        console.error('Copy failed:', err);
+        showNotification('Failed to copy output', 'error');
+    });
+}
+
+function expandConsoleOutput() {
+    const consoleOutput = document.getElementById('consoleOutput');
+    const modalOutput = document.getElementById('modalConsoleOutput');
+    
+    // Clone the output to modal
+    modalOutput.innerHTML = consoleOutput.innerHTML;
+    
+    openModal('outputModal');
+}
+
+// ESC key handler
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const activeModals = document.querySelectorAll('.modal.active');
+        if (activeModals.length > 0) {
+            // Close the last opened modal
+            const lastModal = activeModals[activeModals.length - 1];
+            closeModal(lastModal.id);
+        }
+    }
+});
+
 // Make functions global for onclick handlers
 window.editCommand = editCommand;
 window.deleteCommand = deleteCommand;
@@ -1034,3 +1085,5 @@ window.editProfile = editProfile;
 window.deleteProfile = deleteProfile;
 window.openExternalURL = openExternalURL;
 window.openDashboard = openDashboard;
+window.copyConsoleOutput = copyConsoleOutput;
+window.expandConsoleOutput = expandConsoleOutput;
