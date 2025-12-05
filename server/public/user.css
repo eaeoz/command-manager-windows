@@ -1181,11 +1181,186 @@ textarea:focus {
   font-size: 15px;
 }
 
-/* Responsive for Devices */
-@media (max-width: 768px) {
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  z-index: 100;
+  position: relative;
+}
+
+.mobile-menu-toggle:hover {
+  background: var(--bg-secondary);
+}
+
+.mobile-menu-toggle:active {
+  transform: scale(0.95);
+}
+
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 998;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.mobile-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 968px) {
+  /* Show mobile menu toggle */
+  .mobile-menu-toggle {
+    display: block;
+  }
+  
+  /* Mobile overlay - only visible when active */
+  .mobile-overlay {
+    display: block;
+  }
+  
+  /* Hide sidebar by default on mobile */
+  .dashboard .sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 999;
+    box-shadow: 4px 0 24px var(--shadow-lg);
+    transition: left 0.3s ease;
+  }
+  
+  .dashboard .sidebar.open {
+    left: 0;
+  }
+  
+  /* Top bar adjustments for mobile */
+  .top-bar {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    z-index: 100;
+  }
+  
+  .top-bar h1 {
+    font-size: 20px;
+    flex: 1;
+  }
+  
+  .top-bar .mobile-menu-toggle {
+    order: -1;
+    flex-shrink: 0;
+  }
+  
+  /* Main content takes full width on mobile */
+  .main-content {
+    width: 100%;
+  }
+  
+  /* Page padding on mobile */
+  .page {
+    padding: 20px 16px;
+  }
+  
+  /* Stats grid - single column on mobile */
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  /* Profiles grid - single column */
+  .profiles-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Commands list adjustments */
+  .command-card {
+    padding: 16px;
+  }
+  
+  .command-card-actions {
+    flex-direction: column;
+  }
+  
+  .command-card-actions .btn {
+    width: 100%;
+  }
+  
+  /* Profile card actions */
+  .profile-card-actions {
+    flex-direction: column;
+  }
+  
+  .profile-card-actions .btn {
+    width: 100%;
+  }
+  
+  /* Modal adjustments */
+  .modal {
+    padding: 16px;
+  }
+  
+  .modal-content {
+    max-height: 85vh;
+  }
+  
+  .modal-content form {
+    padding: 20px;
+  }
+  
+  .modal-header {
+    padding: 16px 20px;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    padding: 16px 20px;
+  }
+  
+  .modal-actions .btn {
+    width: 100%;
+  }
+  
+  /* Sync container mobile */
+  .sync-container {
+    padding: 24px 20px;
+  }
+  
+  .sync-stats {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .sync-arrow {
+    transform: rotate(90deg);
+    font-size: 24px;
+  }
+  
+  /* Device item mobile */
   .device-item {
     flex-wrap: wrap;
     gap: 12px;
+    padding: 16px;
   }
   
   .device-item-info {
@@ -1197,11 +1372,155 @@ textarea:focus {
     order: 3;
   }
   
+  /* Sync actions mobile */
   .sync-actions {
     flex-direction: column;
+    width: 100%;
   }
   
   .sync-actions .btn {
     width: 100%;
+  }
+  
+  /* Settings section mobile */
+  .settings-section {
+    padding: 20px;
+  }
+  
+  .settings-section h3 {
+    font-size: 18px;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Quick actions mobile */
+  .action-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Welcome card mobile */
+  .welcome-card {
+    padding: 24px 20px;
+  }
+  
+  .welcome-card h2 {
+    font-size: 24px;
+  }
+  
+  /* Auth container mobile */
+  .auth-container {
+    padding: 28px 20px;
+  }
+  
+  .auth-header h1 {
+    font-size: 26px;
+  }
+  
+  /* Toast mobile */
+  .toast {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    min-width: auto;
+  }
+  
+  /* Table mobile - make scrollable */
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .data-table {
+    min-width: 600px;
+  }
+  
+  /* Config grid mobile */
+  .config-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small devices adjustments */
+  .top-bar h1 {
+    font-size: 18px;
+  }
+  
+  .page {
+    padding: 16px 12px;
+  }
+  
+  .welcome-card {
+    padding: 20px 16px;
+  }
+  
+  .welcome-card h2 {
+    font-size: 20px;
+  }
+  
+  .welcome-card p {
+    font-size: 14px;
+  }
+  
+  .stat-card {
+    padding: 16px;
+  }
+  
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 28px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
+  
+  .modal-content {
+    border-radius: 12px;
+  }
+  
+  .modal-header h3 {
+    font-size: 18px;
+  }
+  
+  .auth-container {
+    padding: 24px 16px;
+  }
+  
+  .sync-container {
+    padding: 20px 16px;
+  }
+  
+  .sync-container h2 {
+    font-size: 20px;
+  }
+}
+
+/* Dark mode specific mobile adjustments */
+@media (max-width: 968px) {
+  [data-theme="dark"] .dashboard .sidebar {
+    background: var(--bg-primary);
+    border-right: 1px solid var(--border-color);
+  }
+  
+  [data-theme="dark"] .mobile-overlay {
+    background: rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* Landscape mode adjustments for tablets */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+  .sidebar {
+    width: 220px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .profiles-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

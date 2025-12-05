@@ -76,9 +76,22 @@ function setupEventListeners() {
   // Refresh button
   const refreshBtn = document.getElementById('refreshBtn');
   if (refreshBtn) {
-    refreshBtn.addEventListener('click', () => {
+    refreshBtn.addEventListener('click', async () => {
       const activePage = document.querySelector('.nav-item.active')?.dataset.page;
-      if (activePage) loadPageData(activePage);
+      if (activePage) {
+        refreshBtn.disabled = true;
+        refreshBtn.textContent = '🔄 Refreshing...';
+        
+        try {
+          await loadPageData(activePage);
+          showToast('Data refreshed successfully!', 'success');
+        } catch (error) {
+          showToast('Failed to refresh data', 'error');
+        } finally {
+          refreshBtn.disabled = false;
+          refreshBtn.textContent = '🔄 Refresh';
+        }
+      }
     });
   }
   
@@ -261,6 +274,7 @@ function showDashboard() {
   document.getElementById('currentUser').textContent = currentUser.username;
   document.getElementById('currentUserEmail').textContent = currentUser.email;
   document.getElementById('welcomeUser').textContent = currentUser.username;
+  setupMobileMenuListeners();
   loadPageData('overview');
 }
 
@@ -293,6 +307,13 @@ function switchPage(pageName) {
     profile: 'My Account'
   };
   document.getElementById('pageTitle').textContent = titles[pageName];
+  
+  // Show/hide refresh button based on page
+  const refreshBtn = document.getElementById('refreshBtn');
+  const pagesWithRefresh = ['overview', 'profiles', 'commands'];
+  if (refreshBtn) {
+    refreshBtn.style.display = pagesWithRefresh.includes(pageName) ? 'block' : 'none';
+  }
   
   loadPageData(pageName);
 }
@@ -983,6 +1004,69 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// Mobile Menu Functions
+function toggleMobileMenu() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('mobileOverlay');
+  
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('active');
+}
+
+function closeMobileMenu() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('mobileOverlay');
+  
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+}
+
+// Setup mobile menu listeners
+function setupMobileMenuListeners() {
+  // Small delay to ensure DOM is ready
+  setTimeout(() => {
+    const menuToggle = document.getElementById('mobileMenuToggle');
+    const overlay = document.getElementById('mobileOverlay');
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    console.log('Setting up mobile menu listeners');
+    console.log('Menu toggle button:', menuToggle);
+    console.log('Overlay:', overlay);
+    
+    if (menuToggle) {
+      // Remove any existing listeners first
+      const newButton = menuToggle.cloneNode(true);
+      menuToggle.parentNode.replaceChild(newButton, menuToggle);
+      
+      newButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Hamburger clicked!');
+        toggleMobileMenu();
+      });
+      
+      console.log('Mobile menu toggle listener added');
+    } else {
+      console.error('Mobile menu toggle button not found!');
+    }
+    
+    if (overlay) {
+      overlay.addEventListener('click', closeMobileMenu);
+      console.log('Overlay listener added');
+    }
+    
+    // Close menu when clicking nav items on mobile
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        if (window.innerWidth <= 968) {
+          closeMobileMenu();
+        }
+      });
+    });
+  }, 100);
+}
+
+
 // Make functions global
 window.showRegister = showRegister;
 window.showLogin = showLogin;
@@ -997,3 +1081,5 @@ window.closeModal = closeModal;
 window.deleteAccount = deleteAccount;
 window.updatePushButton = updatePushButton;
 window.removeDevice = removeDevice;
+window.toggleMobileMenu = toggleMobileMenu;
+window.closeMobileMenu = closeMobileMenu;

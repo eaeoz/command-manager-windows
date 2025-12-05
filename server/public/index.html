@@ -74,8 +74,11 @@
 
         <!-- Dashboard -->
         <div class="dashboard" id="dashboard" style="display: none;">
+            <!-- Mobile Overlay -->
+            <div class="mobile-overlay" id="mobileOverlay"></div>
+            
             <!-- Sidebar -->
-            <aside class="sidebar">
+            <aside class="sidebar" id="sidebar">
                 <div class="sidebar-header">
                     <h2>⚡ Command Manager</h2>
                 </div>
@@ -119,9 +122,10 @@
             <!-- Main Content -->
             <main class="main-content">
                 <header class="top-bar">
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">☰</button>
                     <h1 id="pageTitle">Overview</h1>
                     <div class="top-bar-actions">
-                        <button class="btn btn-refresh" id="refreshBtn">🔄 Refresh</button>
+                        <button class="btn btn-secondary btn-small" id="refreshBtn" style="display: none;">🔄 Refresh</button>
                     </div>
                 </header>
 

@@ -6,21 +6,5 @@
     "profile": "Profile 1",
     "url": "https://google.com",
     "_id": "6932389fb18dbec4d41a31e9"
-  },
-  {
-    "lineNumber": 3,
-    "title": "test 3",
-    "command": "ping twitch.com",
-    "profile": "Profile 2",
-    "url": "https://twitch.com",
-    "_id": "6932389fb18dbec4d41a31ea"
-  },
-  {
-    "lineNumber": 4,
-    "title": "test 4",
-    "command": "ping mynet.com",
-    "profile": "Profile 1",
-    "url": "https://mynet.com",
-    "_id": "6932389fb18dbec4d41a31eb"
   }
 ]
