@@ -19,8 +19,11 @@
                 <button class="btn-icon" id="profilesBtn" title="Manage Profiles">
                     <i class="fas fa-users-cog"></i>
                 </button>
-                <button class="btn-icon" id="settingsBtn" title="Settings">
-                    <i class="fas fa-cog"></i>
+                <button class="btn-icon" id="syncBtn" title="Cloud Sync">
+                    <i class="fas fa-sync"></i>
+                </button>
+                <button class="btn-icon" onclick="openDashboard()" title="Open Web Dashboard">
+                    <i class="fas fa-cloud"></i>
                 </button>
                 <button class="btn-icon btn-close" onclick="window.close()" title="Close">
                     <i class="fas fa-times"></i>
@@ -194,6 +197,108 @@
                             <button type="submit" class="btn-primary">Update Profile</button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sync/Login Modal -->
+    <div class="modal" id="syncModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="syncModalTitle">Cloud Sync</h2>
+                <button class="btn-icon" id="closeSyncModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Login Form (shown when not logged in) -->
+                <div id="loginSection">
+                    <div class="sync-info">
+                        <i class="fas fa-cloud" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                        <p>Login to sync your commands and profiles with the cloud</p>
+                    </div>
+                    <form class="form" id="syncLoginForm">
+                        <div class="form-group">
+                            <label for="syncEmail">Email</label>
+                            <input type="email" id="syncEmail" placeholder="your@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="syncPassword">Password</label>
+                            <input type="password" id="syncPassword" placeholder="Enter password" required>
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login
+                        </button>
+                        <p style="margin-top: 1rem; text-align: center; color: var(--text-muted);">
+                            Don't have an account? 
+                            <a href="#" onclick="openDashboard()" style="color: var(--primary);">Register here</a>
+                        </p>
+                    </form>
+                </div>
+
+                <!-- Sync Section (shown when logged in) -->
+                <div id="syncSection" style="display: none;">
+                    <div class="sync-stats">
+                        <div class="sync-stat-card">
+                            <h3>Local Data</h3>
+                            <div class="stat-row">
+                                <i class="fas fa-laptop"></i>
+                                <div>
+                                    <span id="localProfiles">0</span> Profiles
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <i class="fas fa-terminal"></i>
+                                <div>
+                                    <span id="localCommands">0</span> Commands
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sync-arrow">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+
+                        <div class="sync-stat-card">
+                            <h3>Cloud Data</h3>
+                            <div class="stat-row">
+                                <i class="fas fa-cloud"></i>
+                                <div>
+                                    <span id="cloudProfiles">0</span> Profiles
+                                </div>
+                            </div>
+                            <div class="stat-row">
+                                <i class="fas fa-terminal"></i>
+                                <div>
+                                    <span id="cloudCommands">0</span> Commands
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sync-info" style="margin: 2rem 0;">
+                        <p>Logged in as: <strong id="loggedInUser"></strong></p>
+                        <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                            Last synced: <span id="lastSyncTime">Never</span>
+                        </p>
+                    </div>
+
+                    <div class="sync-actions">
+                        <button class="btn-primary" id="syncPushBtn">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            Push to Cloud (Local → Cloud)
+                        </button>
+                        <button class="btn-primary" id="syncPullBtn">
+                            <i class="fas fa-cloud-download-alt"></i>
+                            Pull from Cloud (Cloud → Local)
+                        </button>
+                        <button class="btn-secondary" id="syncLogoutBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

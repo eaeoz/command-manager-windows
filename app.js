@@ -1,25 +1,28 @@
 const fs = require('fs');
 const path = require('path');
 
-// Define the .env file path
+// Define the .env file paths
 const envPath = path.resolve(__dirname, 'config', '.env');
+const rootEnvPath = path.resolve(__dirname, '.env');
 
-// Default .env content
+// Default .env content for config folder
 const defaultEnvContent = `
 COMMAND_TIMEOUT=10000
 `;
 
-// Check if the .env file exists
+// Check if the config/.env file exists
 if (!fs.existsSync(envPath)) {
     // Create the .env file with default content
     fs.writeFileSync(envPath, defaultEnvContent.trim());
-    console.log('.env file created with default values.');
+    console.log('config/.env file created with default values.');
 } else {
-    console.log('.env file already exists.');
+    console.log('config/.env file already exists.');
 }
 
-// Load environment variables from .env file
-require('dotenv').config({ path: './config/.env' });
+// Load environment variables from root .env file first (for SERVER_URL)
+require('dotenv').config({ path: rootEnvPath });
+// Then load from config/.env (for COMMAND_TIMEOUT)
+require('dotenv').config({ path: envPath });
 
 
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
@@ -1603,6 +1606,25 @@ expressApp.get('/redirect', (req, res) => {
     return res.status(400).send('URL parameter is missing');
 });
 
+// Sync endpoints for Electron app
+expressApp.post('/profiles/sync', (req, res) => {
+    const { profiles } = req.body;
+    if (!profiles || !Array.isArray(profiles)) {
+        return res.status(400).json({ error: 'Invalid profiles data' });
+    }
+    saveProfiles(profiles);
+    res.json({ success: true });
+});
+
+expressApp.post('/commands/sync', (req, res) => {
+    const { commands } = req.body;
+    if (!commands || !Array.isArray(commands)) {
+        return res.status(400).json({ error: 'Invalid commands data' });
+    }
+    saveCommands(commands);
+    res.json({ success: true });
+});
+
 
 
 // Start the Express server
@@ -1669,6 +1691,13 @@ ipcMain.handle('show-confirmation', async (event, message) => {
         message: message,
     });
     return response.response === 1; // 1 means OK was clicked
+});
+
+// IPC handler to open the web dashboard
+ipcMain.on('open-dashboard', () => {
+    const { shell } = require('electron');
+    const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+    shell.openExternal(serverUrl);
 });
 
 // Make sure to call createWindow after app is ready

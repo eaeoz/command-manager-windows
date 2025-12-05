@@ -6,7 +6,10 @@ const { shell } = require('electron');
 const state = {
     commands: [],
     profiles: [],
-    filteredCommands: []
+    filteredCommands: [],
+    authToken: null,
+    userEmail: null,
+    lastSync: null
 };
 
 // Initialize App
@@ -27,10 +30,12 @@ function setupEventListeners() {
     // Header buttons
     document.getElementById('profilesBtn').addEventListener('click', () => openModal('profileModal'));
     document.getElementById('addCommandBtn').addEventListener('click', () => openCommandModal('add'));
+    document.getElementById('syncBtn').addEventListener('click', () => openSyncModal());
     
     // Modal close buttons
     document.getElementById('closeProfileModal').addEventListener('click', () => closeModal('profileModal'));
     document.getElementById('closeCommandModal').addEventListener('click', () => closeModal('commandModal'));
+    document.getElementById('closeSyncModal').addEventListener('click', () => closeModal('syncModal'));
     
     // Click outside modal to close
     document.querySelectorAll('.modal').forEach(modal => {
@@ -62,6 +67,12 @@ function setupEventListeners() {
         document.getElementById('editProfileForm').style.display = 'none';
         loadProfilesList();
     });
+    
+    // Sync functions
+    document.getElementById('syncLoginForm').addEventListener('submit', handleSyncLogin);
+    document.getElementById('syncPushBtn').addEventListener('click', handleSyncPush);
+    document.getElementById('syncPullBtn').addEventListener('click', handleSyncPull);
+    document.getElementById('syncLogoutBtn').addEventListener('click', handleSyncLogout);
 }
 
 // Modal Functions
@@ -507,6 +518,11 @@ function setupSortable() {
     });
 }
 
+// Dashboard Integration
+function openDashboard() {
+    ipcRenderer.send('open-dashboard');
+}
+
 // Utility Functions
 function handleSearch(e) {
     const query = e.target.value.toLowerCase();
@@ -561,6 +577,209 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Sync Functions
+async function openSyncModal() {
+    const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+    
+    // Check if already logged in
+    if (state.authToken) {
+        showSyncSection();
+        await loadCloudData();
+    } else {
+        showLoginSection();
+    }
+    
+    openModal('syncModal');
+}
+
+function showLoginSection() {
+    document.getElementById('loginSection').style.display = 'block';
+    document.getElementById('syncSection').style.display = 'none';
+}
+
+function showSyncSection() {
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('syncSection').style.display = 'block';
+    
+    // Update local stats
+    document.getElementById('localProfiles').textContent = state.profiles.length;
+    document.getElementById('localCommands').textContent = state.commands.length;
+    document.getElementById('loggedInUser').textContent = state.userEmail || 'Unknown';
+    document.getElementById('lastSyncTime').textContent = state.lastSync || 'Never';
+}
+
+async function handleSyncLogin(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('syncEmail').value;
+    const password = document.getElementById('syncPassword').value;
+    const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+    
+    try {
+        const response = await fetch(`${serverUrl}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.token) {
+            state.authToken = data.token;
+            state.userEmail = email;
+            showNotification('Login successful!', 'success');
+            showSyncSection();
+            await loadCloudData();
+        } else {
+            showNotification(data.message || 'Login failed', 'error');
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showNotification('Failed to connect to server', 'error');
+    }
+}
+
+async function loadCloudData() {
+    const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+    
+    try {
+        // Load cloud profiles
+        const profilesResponse = await fetch(`${serverUrl}/api/config/profiles`, {
+            headers: { 'Authorization': `Bearer ${state.authToken}` }
+        });
+        
+        // Load cloud commands
+        const commandsResponse = await fetch(`${serverUrl}/api/config/commands`, {
+            headers: { 'Authorization': `Bearer ${state.authToken}` }
+        });
+        
+        if (profilesResponse.ok && commandsResponse.ok) {
+            const cloudProfiles = await profilesResponse.json();
+            const cloudCommands = await commandsResponse.json();
+            
+            document.getElementById('cloudProfiles').textContent = cloudProfiles.length;
+            document.getElementById('cloudCommands').textContent = cloudCommands.length;
+        }
+    } catch (error) {
+        console.error('Error loading cloud data:', error);
+        showNotification('Failed to load cloud data', 'error');
+    }
+}
+
+async function handleSyncPush() {
+    const confirmed = await ipcRenderer.invoke('show-confirmation', 
+        `This will REPLACE all cloud data with your local data. Continue?`);
+    
+    if (!confirmed) return;
+    
+    const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+    const syncBtn = document.getElementById('syncPushBtn');
+    syncBtn.disabled = true;
+    syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Pushing...';
+    
+    try {
+        // Push profiles
+        const profilesResponse = await fetch(`${serverUrl}/api/config/profiles`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${state.authToken}`
+            },
+            body: JSON.stringify(state.profiles)
+        });
+        
+        // Push commands
+        const commandsResponse = await fetch(`${serverUrl}/api/config/commands`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${state.authToken}`
+            },
+            body: JSON.stringify(state.commands)
+        });
+        
+        if (profilesResponse.ok && commandsResponse.ok) {
+            state.lastSync = new Date().toLocaleString();
+            showNotification('Successfully pushed to cloud!', 'success');
+            await loadCloudData();
+        } else {
+            showNotification('Failed to push data', 'error');
+        }
+    } catch (error) {
+        console.error('Sync push error:', error);
+        showNotification('Sync failed', 'error');
+    } finally {
+        syncBtn.disabled = false;
+        syncBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Push to Cloud (Local → Cloud)';
+    }
+}
+
+async function handleSyncPull() {
+    const confirmed = await ipcRenderer.invoke('show-confirmation', 
+        `This will REPLACE all local data with cloud data. Continue?`);
+    
+    if (!confirmed) return;
+    
+    const serverUrl = process.env.SERVER_URL || 'http://localhost:5000';
+    const syncBtn = document.getElementById('syncPullBtn');
+    syncBtn.disabled = true;
+    syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Pulling...';
+    
+    try {
+        // Get cloud data
+        const profilesResponse = await fetch(`${serverUrl}/api/config/profiles`, {
+            headers: { 'Authorization': `Bearer ${state.authToken}` }
+        });
+        
+        const commandsResponse = await fetch(`${serverUrl}/api/config/commands`, {
+            headers: { 'Authorization': `Bearer ${state.authToken}` }
+        });
+        
+        if (profilesResponse.ok && commandsResponse.ok) {
+            const cloudProfiles = await profilesResponse.json();
+            const cloudCommands = await commandsResponse.json();
+            
+            // Save to local
+            await fetch('/profiles/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ profiles: cloudProfiles })
+            });
+            
+            await fetch('/commands/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commands: cloudCommands })
+            });
+            
+            state.lastSync = new Date().toLocaleString();
+            showNotification('Successfully pulled from cloud!', 'success');
+            
+            // Reload local data
+            await loadProfiles();
+            await loadCommands();
+            await loadCloudData();
+        } else {
+            showNotification('Failed to pull data', 'error');
+        }
+    } catch (error) {
+        console.error('Sync pull error:', error);
+        showNotification('Sync failed', 'error');
+    } finally {
+        syncBtn.disabled = false;
+        syncBtn.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Pull from Cloud (Cloud → Local)';
+    }
+}
+
+function handleSyncLogout() {
+    state.authToken = null;
+    state.userEmail = null;
+    document.getElementById('syncEmail').value = '';
+    document.getElementById('syncPassword').value = '';
+    showLoginSection();
+    showNotification('Logged out successfully', 'success');
+}
+
 // Make functions global for onclick handlers
 window.editCommand = editCommand;
 window.deleteCommand = deleteCommand;
@@ -568,3 +787,4 @@ window.runCommand = runCommand;
 window.editProfile = editProfile;
 window.deleteProfile = deleteProfile;
 window.openExternalURL = openExternalURL;
+window.openDashboard = openDashboard;
