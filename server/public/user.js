@@ -844,8 +844,9 @@ async function removeDevice(deviceId) {
 
 async function refreshDevices() {
   const btn = document.getElementById('refreshDevicesBtn');
+  const originalHTML = btn.innerHTML;
   btn.disabled = true;
-  btn.textContent = '🔄 Refreshing...';
+  btn.innerHTML = '⏳';
   
   try {
     await loadDevices();
@@ -854,7 +855,7 @@ async function refreshDevices() {
     showToast('Failed to refresh devices', 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = '🔄 Refresh Devices';
+    btn.innerHTML = originalHTML;
   }
 }
 

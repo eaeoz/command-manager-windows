@@ -293,8 +293,15 @@
                         </div>
 
                         <div class="devices-section" style="margin-top: 2rem;">
-                            <h3 style="margin-bottom: 1rem;">📱 Connected Devices</h3>
-                            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Select devices to push your cloud configuration to them</p>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <div>
+                                    <h3 style="margin-bottom: 0.5rem;">📱 Connected Devices</h3>
+                                    <p style="color: var(--text-muted); margin: 0;">Select devices to push your cloud configuration to them</p>
+                                </div>
+                                <button class="btn btn-secondary" id="refreshDevicesBtn" title="Refresh Devices">
+                                    🔄
+                                </button>
+                            </div>
                             
                             <div class="devices-list" id="devicesList">
                                 <p class="loading">Loading devices...</p>
@@ -304,9 +311,6 @@
                         <div class="sync-actions" style="margin-top: 2rem;">
                             <button class="btn btn-primary btn-large" id="pushToDevicesBtn" disabled>
                                 ⬇️ Push to Selected Devices
-                            </button>
-                            <button class="btn btn-secondary" id="refreshDevicesBtn" style="margin-left: 1rem;">
-                                🔄 Refresh Devices
                             </button>
                         </div>
                     </div>
