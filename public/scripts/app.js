@@ -228,9 +228,9 @@ function renderCommands() {
             </div>
             <div class="command-text">${escapeHtml(cmd.command)}</div>
             ${cmd.url ? `
-                <div class="command-url-badge" onclick="openExternalURL('${escapeHtml(cmd.url)}')" title="Click to open: ${escapeHtml(cmd.url)}">
+                <div class="command-url-badge" onclick="openExternalURL('${escapeHtml(cmd.url)}')" title="${escapeHtml(cmd.url)}">
                     <i class="fas fa-external-link-alt"></i>
-                    <span>${escapeHtml(cmd.url)}</span>
+                    <span>LINK</span>
                 </div>
             ` : ''}
             <div class="command-footer">
