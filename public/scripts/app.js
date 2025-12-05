@@ -79,6 +79,7 @@ function setupEventListeners() {
     // Profile edit cancel
     document.getElementById('cancelEdit').addEventListener('click', () => {
         document.getElementById('editProfileForm').style.display = 'none';
+        document.getElementById('profileList').style.display = 'block';
         loadProfilesList();
     });
     
@@ -115,6 +116,7 @@ function closeModal(modalId) {
         document.getElementById('addProfileForm').reset();
         document.getElementById('editProfileForm').reset();
         document.getElementById('editProfileForm').style.display = 'none';
+        document.getElementById('profileList').style.display = 'block';
     }
     if (modalId === 'commandModal') {
         document.getElementById('commandForm').reset();

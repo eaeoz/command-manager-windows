@@ -20,6 +20,6 @@
     "title": "ping google",
     "command": "ping -c 3  google.com",
     "url": "https://www.google.com",
-    "profile": "Profile 1"
+    "profile": "media"
   }
 ]
