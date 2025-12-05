@@ -1110,19 +1110,21 @@ async function handleBackup() {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `command-manager-backup-${new Date().getTime()}.bin`;
+            const filename = `command-manager-backup-${new Date().getTime()}.bin`;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
             
-            showNotification('Backup created successfully!', 'success');
+            // Show nice toast notification instead of popup
+            showToastNotification('Backup Downloaded!', `File saved: ${filename}`, 'success');
         } else {
-            showNotification('Failed to create backup', 'error');
+            showToastNotification('Backup Failed', 'Failed to create backup file', 'error');
         }
     } catch (error) {
         console.error('Backup error:', error);
-        showNotification('Failed to create backup', 'error');
+        showToastNotification('Backup Failed', error.message, 'error');
     } finally {
         backupBtn.disabled = false;
         backupBtn.innerHTML = '<i class="fas fa-download"></i> Create Backup (Save .bin file)';
@@ -1157,7 +1159,7 @@ async function handleRestore(event) {
         const data = await response.json();
         
         if (response.ok && data.success) {
-            showNotification('Backup restored successfully!', 'success');
+            showToastNotification('Backup Restored!', `${data.profileCount} profiles and ${data.commandCount} commands restored`, 'success');
             
             // Reload data
             await loadProfiles();
@@ -1167,16 +1169,106 @@ async function handleRestore(event) {
             loadProfilesList();
             populateProfileSelect();
         } else {
-            showNotification(data.error || 'Failed to restore backup', 'error');
+            showToastNotification('Restore Failed', data.error || 'Failed to restore backup', 'error');
         }
     } catch (error) {
         console.error('Restore error:', error);
-        showNotification('Failed to restore backup', 'error');
+        showToastNotification('Restore Failed', error.message, 'error');
     } finally {
         restoreBtn.disabled = false;
         restoreBtn.innerHTML = '<i class="fas fa-upload"></i> Restore from Backup (Browse .bin file)';
         event.target.value = ''; // Reset file input
     }
+}
+
+// Toast Notification Function
+function showToastNotification(title, message, type = 'info') {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toastContainer';
+        toastContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        `;
+        document.body.appendChild(toastContainer);
+    }
+    
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+    const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
+    
+    toast.style.cssText = `
+        background: ${bgColor};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        min-width: 300px;
+        max-width: 400px;
+        animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    `;
+    
+    toast.innerHTML = `
+        <i class="fas ${icon}" style="font-size: 1.5rem; margin-top: 2px;"></i>
+        <div style="flex: 1;">
+            <div style="font-weight: 600; font-size: 1rem; margin-bottom: 4px;">${title}</div>
+            <div style="font-size: 0.875rem; opacity: 0.9;">${message}</div>
+        </div>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Remove toast after animation
+    setTimeout(() => {
+        toast.remove();
+        // Remove container if no more toasts
+        if (toastContainer.children.length === 0) {
+            toastContainer.remove();
+        }
+    }, 3000);
+}
+
+// Add animation styles if not already added
+if (!document.getElementById('toastStyles')) {
+    const style = document.createElement('style');
+    style.id = 'toastStyles';
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 // Make functions global for onclick handlers
