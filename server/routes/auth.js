@@ -438,14 +438,20 @@ router.get('/devices', auth, async (req, res) => {
     const profileCount = config ? config.profiles.length : 0;
     const commandCount = config ? config.commands.length : 0;
     
-    // Mark devices as offline if not seen in last 5 minutes
+    // Check if device was manually logged out OR hasn't been seen in 5 minutes
     const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
-    const devicesWithStats = user.devices.map(device => ({
-      ...device.toObject(),
-      online: device.lastSeen >= fiveMinutesAgo,
-      profileCount,
-      commandCount
-    }));
+    const devicesWithStats = user.devices.map(device => {
+      // If device.online is explicitly false (logged out), keep it offline
+      // Otherwise, check if it's been seen recently
+      const isOnline = device.online === false ? false : device.lastSeen >= fiveMinutesAgo;
+      
+      return {
+        ...device.toObject(),
+        online: isOnline,
+        profileCount,
+        commandCount
+      };
+    });
     
     res.json({
       success: true,
