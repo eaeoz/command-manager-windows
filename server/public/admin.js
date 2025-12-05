@@ -264,8 +264,8 @@ function renderUsersTable(users) {
       <td><span class="status-badge status-${user.isActive ? 'active' : 'inactive'}">${user.isActive ? 'Active' : 'Inactive'}</span></td>
       <td>${user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}</td>
       <td class="table-actions">
-        <button class="btn btn-small btn-secondary" onclick="editUser('${user._id}')">Edit</button>
-        <button class="btn btn-small btn-danger" onclick="deleteUser('${user._id}', '${escapeHtml(user.username)}')">Delete</button>
+        <button class="btn btn-small btn-secondary" onclick="editUser('${user._id}')" title="Edit User">✏️</button>
+        <button class="btn btn-small btn-danger" onclick="deleteUser('${user._id}', '${escapeHtml(user.username)}')" title="Delete User">🗑️</button>
       </td>
     </tr>
   `).join('');

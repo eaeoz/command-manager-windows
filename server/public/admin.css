@@ -546,8 +546,12 @@ body {
 }
 
 .data-table td {
-  padding: 16px;
+  padding: 16px 24px;
   border-top: 1px solid var(--border-color);
+}
+
+.data-table td:last-child {
+  padding-right: 32px;
 }
 
 .data-table tbody tr:hover {
@@ -1047,12 +1051,92 @@ body {
     width: 100%;
   }
   
+  /* Mobile User Cards */
   .table-container {
-    overflow-x: auto;
+    background: transparent;
+    border: none;
+    overflow: visible;
   }
   
-  .data-table {
-    min-width: 600px;
+  .data-table thead {
+    display: none;
+  }
+  
+  .data-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .data-table tbody tr {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .data-table tbody tr:hover {
+    background: var(--bg-primary);
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+  
+  .data-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .data-table td:last-child {
+    border-bottom: none;
+  }
+  
+  .data-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+  }
+  
+  .data-table td:nth-child(1)::before {
+    content: 'Username';
+  }
+  
+  .data-table td:nth-child(2)::before {
+    content: 'Email';
+  }
+  
+  .data-table td:nth-child(3)::before {
+    content: 'Role';
+  }
+  
+  .data-table td:nth-child(4)::before {
+    content: 'Status';
+  }
+  
+  .data-table td:nth-child(5)::before {
+    content: 'Last Login';
+  }
+  
+  .data-table td:nth-child(6)::before {
+    content: 'Actions';
+  }
+  
+  .table-actions {
+    flex-direction: row;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .table-actions .btn {
+    flex: 1;
   }
   
   .modal-content {
