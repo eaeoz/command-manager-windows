@@ -43,6 +43,18 @@ const userSchema = new mongoose.Schema({
   lockUntil: {
     type: Date
   },
+  isEmailVerified: {
+    type: Boolean,
+    default: false
+  },
+  emailVerificationToken: {
+    type: String,
+    select: false
+  },
+  emailVerificationExpires: {
+    type: Date,
+    select: false
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -155,6 +167,21 @@ userSchema.methods.resetLoginAttempts = function() {
     $set: { loginAttempts: 0, lastLogin: Date.now() },
     $unset: { lockUntil: 1 }
   });
+};
+
+// Generate email verification token
+userSchema.methods.generateEmailVerificationToken = function() {
+  const crypto = require('crypto');
+  const token = crypto.randomBytes(32).toString('hex');
+  
+  this.emailVerificationToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+  
+  this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  
+  return token;
 };
 
 // Remove password from JSON output

@@ -112,6 +112,11 @@ app.get('/favicon.ico', (req, res) => {
   res.send(svg);
 });
 
+// Email verification route - serves the user dashboard with token in URL
+app.get('/verify-email', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // User dashboard route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

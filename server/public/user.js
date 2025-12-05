@@ -10,9 +10,37 @@ let userConfig = { profiles: [], commands: [] };
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
   initializeTheme();
+  checkEmailVerification(); // Check for email verification token
   checkAuth();
   setupEventListeners();
 });
+
+// Check for email verification token in URL
+async function checkEmailVerification() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+  
+  if (token) {
+    try {
+      const response = await fetch(`${API_URL}/auth/verify-email?token=${token}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        showToast('✅ ' + data.message, 'success');
+        // Remove token from URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else {
+        showToast('❌ ' + data.message, 'error');
+        // Remove token from URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    } catch (error) {
+      showToast('❌ Email verification failed', 'error');
+      // Remove token from URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }
+}
 
 // Theme Management
 function initializeTheme() {
@@ -194,14 +222,26 @@ async function handleRegister(e) {
     const data = await response.json();
     
     if (data.success) {
-      authToken = data.token;
-      currentUser = data.user;
-      
-      localStorage.setItem('userAuthToken', authToken);
-      localStorage.setItem('userCurrentUser', JSON.stringify(currentUser));
-      
-      showToast('Account created successfully!', 'success');
-      showDashboard();
+      // Email verification required - show success message
+      if (data.requiresVerification) {
+        showToast('✅ Registration successful! Please check your email to verify your account before logging in.', 'success');
+        
+        // Clear form and switch to login
+        e.target.reset();
+        setTimeout(() => {
+          showLogin();
+        }, 3000);
+      } else {
+        // Old flow (if verification is disabled)
+        authToken = data.token;
+        currentUser = data.user;
+        
+        localStorage.setItem('userAuthToken', authToken);
+        localStorage.setItem('userCurrentUser', JSON.stringify(currentUser));
+        
+        showToast('Account created successfully!', 'success');
+        showDashboard();
+      }
     } else {
       throw new Error(data.message || 'Registration failed');
     }
@@ -244,7 +284,19 @@ async function handleLogin(e) {
       
       showDashboard();
     } else {
-      throw new Error(data.message || 'Login failed');
+      // Check if email verification is required
+      if (data.requiresVerification) {
+        errorDiv.innerHTML = `
+          ${data.message}
+          <br><br>
+          <button class="btn btn-secondary btn-small" onclick="resendVerification('${email}')" style="margin-top: 10px;">
+            📧 Resend Verification Email
+          </button>
+        `;
+        errorDiv.classList.add('show');
+      } else {
+        throw new Error(data.message || 'Login failed');
+      }
     }
   } catch (error) {
     errorDiv.textContent = error.message;
@@ -252,6 +304,27 @@ async function handleLogin(e) {
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<span>Sign In</span>';
+  }
+}
+
+// Resend verification email
+async function resendVerification(email) {
+  try {
+    const response = await fetch(`${API_URL}/auth/resend-verification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      showToast('📧 Verification email sent! Please check your inbox.', 'success');
+    } else {
+      showToast(data.message || 'Failed to resend verification email', 'error');
+    }
+  } catch (error) {
+    showToast('Failed to resend verification email', 'error');
   }
 }
 

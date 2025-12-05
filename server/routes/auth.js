@@ -1,10 +1,77 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const Configuration = require('../models/Configuration');
 const { sendTokenResponse, auth } = require('../middleware/auth');
 const { authLimiter, registerLimiter } = require('../middleware/rateLimiter');
+require('dotenv').config();
+
+// Email transporter
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT),
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  }
+});
+
+// Send verification email
+async function sendVerificationEmail(user, token) {
+  const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:5000'}/verify-email?token=${token}`;
+  
+  const mailOptions = {
+    from: `"Command Manager" <${process.env.SMTP_USER}>`,
+    to: user.email,
+    subject: '⚡ Verify Your Email - Command Manager',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+          <h1 style="color: white; margin: 0;">⚡ Command Manager</h1>
+          <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Email Verification</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 30px;">
+          <h2 style="color: #333; margin-top: 0;">Welcome, ${user.username}!</h2>
+          <p style="color: #666; line-height: 1.6;">
+            Thank you for registering with Command Manager. To complete your registration and start managing your SSH commands, please verify your email address.
+          </p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+              ✅ Verify Email Address
+            </a>
+          </div>
+          
+          <p style="color: #666; font-size: 14px; line-height: 1.6;">
+            Or copy and paste this link into your browser:
+          </p>
+          <p style="color: #667eea; font-size: 12px; word-break: break-all; background: white; padding: 10px; border-radius: 4px;">
+            ${verificationUrl}
+          </p>
+          
+          <p style="color: #999; font-size: 12px; margin-top: 30px;">
+            ⏰ This link will expire in 24 hours.
+          </p>
+          <p style="color: #999; font-size: 12px;">
+            🔒 If you didn't create an account, please ignore this email.
+          </p>
+        </div>
+        
+        <div style="background: #e9ecef; padding: 20px; text-align: center; font-size: 12px; color: #6c757d;">
+          <p style="margin: 0;">⚡ Command Manager - SSH Command Management</p>
+          <p style="margin: 5px 0 0 0;">© ${new Date().getFullYear()} All rights reserved</p>
+        </div>
+      </div>
+    `
+  };
+  
+  await transporter.sendMail(mailOptions);
+}
 
 // @route   POST /api/auth/register
 // @desc    Register a new user
@@ -48,13 +115,18 @@ router.post('/register',
         });
       }
 
-      // Create user
+      // Create user (not verified yet)
       const user = await User.create({
         username,
         email,
         password,
-        role: 'user'
+        role: 'user',
+        isEmailVerified: false
       });
+
+      // Generate verification token
+      const verificationToken = user.generateEmailVerificationToken();
+      await user.save();
 
       // Create empty configuration for user
       await Configuration.create({
@@ -63,7 +135,27 @@ router.post('/register',
         commands: []
       });
 
-      sendTokenResponse(user, 201, res);
+      // Send verification email
+      try {
+        await sendVerificationEmail(user, verificationToken);
+      } catch (emailError) {
+        console.error('Failed to send verification email:', emailError);
+        // Continue with registration even if email fails
+      }
+
+      // Return success with message about email verification
+      res.status(201).json({
+        success: true,
+        message: 'Registration successful! Please check your email to verify your account.',
+        requiresVerification: true,
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          isEmailVerified: user.isEmailVerified
+        }
+      });
     } catch (error) {
       console.error('Registration error:', error);
       res.status(500).json({
@@ -130,6 +222,16 @@ router.post('/login',
         return res.status(401).json({
           success: false,
           message: 'Invalid credentials'
+        });
+      }
+
+      // Check if email is verified
+      if (!user.isEmailVerified) {
+        return res.status(403).json({
+          success: false,
+          message: 'Please verify your email address before logging in. Check your inbox for the verification link.',
+          requiresVerification: true,
+          email: user.email
         });
       }
 
@@ -543,5 +645,115 @@ router.delete('/device/:deviceId', auth, async (req, res) => {
     });
   }
 });
+
+// @route   GET /api/auth/verify-email
+// @desc    Verify email address
+// @access  Public
+router.get('/verify-email', async (req, res) => {
+  try {
+    const { token } = req.query;
+    
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification token is required'
+      });
+    }
+    
+    // Hash the token to match stored hash
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+    
+    // Find user with matching token that hasn't expired
+    const user = await User.findOne({
+      emailVerificationToken: hashedToken,
+      emailVerificationExpires: { $gt: Date.now() }
+    }).select('+emailVerificationToken +emailVerificationExpires');
+    
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token'
+      });
+    }
+    
+    // Verify the email
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+    
+    res.json({
+      success: true,
+      message: 'Email verified successfully! You can now log in.'
+    });
+  } catch (error) {
+    console.error('Email verification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error verifying email'
+    });
+  }
+});
+
+// @route   POST /api/auth/resend-verification
+// @desc    Resend verification email
+// @access  Public
+router.post('/resend-verification',
+  authLimiter,
+  [
+    body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email')
+  ],
+  async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      const user = await User.findOne({ email }).select('+emailVerificationToken +emailVerificationExpires');
+      
+      if (!user) {
+        // Don't reveal if email exists
+        return res.json({
+          success: true,
+          message: 'If the email exists and is not verified, a verification email has been sent.'
+        });
+      }
+      
+      if (user.isEmailVerified) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email is already verified'
+        });
+      }
+      
+      // Generate new verification token
+      const verificationToken = user.generateEmailVerificationToken();
+      await user.save();
+      
+      // Send verification email
+      try {
+        await sendVerificationEmail(user, verificationToken);
+      } catch (emailError) {
+        console.error('Failed to send verification email:', emailError);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to send verification email'
+        });
+      }
+      
+      res.json({
+        success: true,
+        message: 'Verification email sent successfully'
+      });
+    } catch (error) {
+      console.error('Resend verification error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error resending verification email'
+      });
+    }
+  }
+);
 
 module.exports = router;
