@@ -454,7 +454,10 @@ async function viewConfiguration(configId) {
           </div>
           
           <div style="margin-bottom: 24px;">
-            <h4 style="margin-bottom: 12px;">Profiles (${config.profiles.length})</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h4 style="margin: 0;">Profiles (${config.profiles.length})</h4>
+              <button class="btn btn-small btn-primary" onclick="addConfigProfile()" title="Add Profile">+ Add Profile</button>
+            </div>
             ${config.profiles.length > 0 ? `
               <div style="max-height: 300px; overflow-y: auto;">
                 ${config.profiles.map((p, index) => `
@@ -476,7 +479,10 @@ async function viewConfiguration(configId) {
           </div>
           
           <div>
-            <h4 style="margin-bottom: 12px;">Commands (${config.commands.length})</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h4 style="margin: 0;">Commands (${config.commands.length})</h4>
+              <button class="btn btn-small btn-primary" onclick="addConfigCommand()" title="Add Command">+ Add Command</button>
+            </div>
             ${config.commands.length > 0 ? `
               <div style="max-height: 300px; overflow-y: auto;">
                 ${config.commands.map((c, index) => `
@@ -752,10 +758,85 @@ async function saveSettings() {
   }
 }
 
+// Add new profile to configuration
+function addConfigProfile() {
+  const config = window.currentViewedConfig;
+  
+  const title = prompt('Profile Title:');
+  if (!title) return;
+  
+  const host = prompt('Host:');
+  if (!host) return;
+  
+  const username = prompt('Username:');
+  if (!username) return;
+  
+  const password = prompt('Password:');
+  if (!password) return;
+  
+  const port = prompt('Port:', '22');
+  if (!port) return;
+  
+  // Add new profile
+  const newProfile = {
+    title: title,
+    host: host,
+    username: username,
+    password: password,
+    port: parseInt(port)
+  };
+  
+  config.profiles.push(newProfile);
+  
+  // Save to server
+  saveUserConfiguration(config);
+}
+
+// Add new command to configuration
+function addConfigCommand() {
+  const config = window.currentViewedConfig;
+  
+  const title = prompt('Command Title:');
+  if (!title) return;
+  
+  const command = prompt('Command:');
+  if (!command) return;
+  
+  const profile = prompt('Profile:');
+  if (!profile) return;
+  
+  const url = prompt('URL (optional):');
+  
+  // Calculate next line number
+  const maxLineNumber = config.commands.length > 0 
+    ? Math.max(...config.commands.map(c => c.lineNumber || 0))
+    : 0;
+  
+  // Add new command
+  const newCommand = {
+    lineNumber: maxLineNumber + 1,
+    title: title,
+    command: command,
+    profile: profile,
+    url: url || ''
+  };
+  
+  config.commands.push(newCommand);
+  
+  // Save to server
+  saveUserConfiguration(config);
+}
+
 // Make functions global
 window.editUser = editUser;
 window.deleteUser = deleteUser;
 window.viewConfiguration = viewConfiguration;
+window.addConfigProfile = addConfigProfile;
+window.addConfigCommand = addConfigCommand;
+window.editConfigProfile = editConfigProfile;
+window.deleteConfigProfile = deleteConfigProfile;
+window.editConfigCommand = editConfigCommand;
+window.deleteConfigCommand = deleteConfigCommand;
 window.closeModal = closeModal;
 window.loadSettingsData = loadSettingsData;
 window.saveSettings = saveSettings;
