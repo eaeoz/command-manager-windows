@@ -115,6 +115,59 @@ function setupEventListeners() {
         applyCardSize(size);
         localStorage.setItem('cardSize', size);
     });
+    
+    // Theme selector
+    const themeBtn = document.getElementById('themeBtn');
+    const themeDropdown = document.getElementById('themeDropdown');
+    
+    themeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        themeDropdown.classList.toggle('active');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!themeDropdown.contains(e.target) && e.target !== themeBtn) {
+            themeDropdown.classList.remove('active');
+        }
+    });
+    
+    // Theme options
+    document.querySelectorAll('.theme-option').forEach(option => {
+        option.addEventListener('click', () => {
+            const primary = option.dataset.primary;
+            const secondary = option.dataset.secondary;
+            const themeName = option.dataset.theme;
+            
+            applyTheme(primary, secondary);
+            localStorage.setItem('theme', themeName);
+            localStorage.setItem('primaryColor', primary);
+            localStorage.setItem('secondaryColor', secondary);
+            
+            // Update active state
+            document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+            
+            themeDropdown.classList.remove('active');
+        });
+    });
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    const savedPrimary = localStorage.getItem('primaryColor');
+    const savedSecondary = localStorage.getItem('secondaryColor');
+    
+    if (savedPrimary && savedSecondary) {
+        applyTheme(savedPrimary, savedSecondary);
+        // Mark active theme
+        const activeOption = document.querySelector(`[data-theme="${savedTheme}"]`);
+        if (activeOption) {
+            activeOption.classList.add('active');
+        }
+    } else {
+        // Mark default theme as active
+        document.querySelector('[data-theme="indigo-purple"]').classList.add('active');
+    }
 }
 
 // Modal Functions
@@ -1290,6 +1343,44 @@ if (!document.getElementById('toastStyles')) {
         }
     `;
     document.head.appendChild(style);
+}
+
+// Theme Application Function
+function applyTheme(primary, secondary) {
+    const root = document.documentElement;
+    
+    // Update CSS variables
+    root.style.setProperty('--primary-color', primary);
+    root.style.setProperty('--secondary-color', secondary);
+    
+    // Calculate hover color (slightly darker)
+    const primaryHover = adjustColor(primary, -10);
+    root.style.setProperty('--primary-hover', primaryHover);
+    
+    // Apply secondary color to backgrounds with reduced opacity
+    const secondaryRgb = hexToRgb(secondary);
+    root.style.setProperty('--bg-secondary', `rgba(${secondaryRgb.r}, ${secondaryRgb.g}, ${secondaryRgb.b}, 0.08)`);
+    root.style.setProperty('--bg-tertiary', `rgba(${secondaryRgb.r}, ${secondaryRgb.g}, ${secondaryRgb.b}, 0.15)`);
+    root.style.setProperty('--border-color', `rgba(${secondaryRgb.r}, ${secondaryRgb.g}, ${secondaryRgb.b}, 0.2)`);
+}
+
+// Helper function to convert hex to RGB
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : { r: 0, g: 0, b: 0 };
+}
+
+// Helper function to adjust color brightness
+function adjustColor(color, amount) {
+    const hex = color.replace('#', '');
+    const r = Math.max(0, Math.min(255, parseInt(hex.substr(0, 2), 16) + amount));
+    const g = Math.max(0, Math.min(255, parseInt(hex.substr(2, 2), 16) + amount));
+    const b = Math.max(0, Math.min(255, parseInt(hex.substr(4, 2), 16) + amount));
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }
 
 // Card Size Adjustment Function
