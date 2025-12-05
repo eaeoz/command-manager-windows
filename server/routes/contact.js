@@ -67,7 +67,7 @@ router.post('/', contactLimiter, async (req, res) => {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
-            <h1 style="color: white; margin: 0;">⚡ Command Manager</h1>
+            <h1 style="color: white; margin: 0;">>_ Command Manager</h1>
             <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">New Contact Form Submission</p>
           </div>
           
