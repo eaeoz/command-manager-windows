@@ -127,7 +127,7 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
   }
 };
 
-// Increment login attempts
+// Increment login attempts - IP Blocking after 10 failed attempts
 userSchema.methods.incLoginAttempts = function() {
   // If lock has expired, reset attempts
   if (this.lockUntil && this.lockUntil < Date.now()) {
@@ -138,7 +138,7 @@ userSchema.methods.incLoginAttempts = function() {
   }
   
   const updates = { $inc: { loginAttempts: 1 } };
-  const maxAttempts = 5;
+  const maxAttempts = 10; // Changed from 5 to 10
   const lockTime = 2 * 60 * 60 * 1000; // 2 hours
   
   // Lock account after max attempts

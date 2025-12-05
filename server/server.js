@@ -23,11 +23,56 @@ mongoose.connect(mongoUri, {
   process.exit(1);
 });
 
-// Security middleware
+// Security middleware - Enhanced Configuration
 app.use(helmet({
-  contentSecurityPolicy: false, // Allow inline scripts for admin panel
-  crossOriginEmbedderPolicy: false
+  // X-XSS-Protection: 1; mode=block
+  xssFilter: true,
+  
+  // X-Frame-Options: DENY (prevent clickjacking)
+  frameguard: { action: 'deny' },
+  
+  // X-Content-Type-Options: nosniff
+  contentTypeNosniff: true,
+  
+  // Strict-Transport-Security (HTTPS only in production)
+  hsts: {
+    maxAge: 31536000, // 1 year in seconds
+    includeSubDomains: true,
+    preload: true
+  },
+  
+  // Content-Security-Policy (more permissive for admin panel)
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-hashes'", "https://www.google.com", "https://www.gstatic.com"],
+      scriptSrcAttr: ["'unsafe-hashes'", "'unsafe-inline'"], // Allow inline event handlers
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'self'", "https://www.google.com"],
+    },
+  },
+  
+  // Permissions-Policy (formerly Feature-Policy)
+  permissionsPolicy: {
+    features: {
+      geolocation: ["'none'"],
+      microphone: ["'none'"],
+      camera: ["'none'"],
+      payment: ["'none'"],
+      usb: ["'none'"],
+    },
+  },
+  
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "same-site" },
+  crossOriginOpenerPolicy: { policy: "same-origin" },
 }));
+
 app.use(mongoSanitize());
 
 // CORS
@@ -55,9 +100,16 @@ app.use('/api/contact', require('./routes/contact'));
 // Serve admin panel static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Favicon route (prevent 404)
+// Favicon route - Serve lightning bolt emoji as SVG
 app.get('/favicon.ico', (req, res) => {
-  res.status(204).end();
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <text y="75" font-size="75">⚡</text>
+    </svg>
+  `;
+  res.setHeader('Content-Type', 'image/svg+xml');
+  res.setHeader('Cache-Control', 'public, max-age=31536000');
+  res.send(svg);
 });
 
 // User dashboard route

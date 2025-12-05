@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
 const axios = require('axios');
+const { contactLimiter } = require('../middleware/rateLimiter');
 require('dotenv').config();
 
 // Create email transporter
@@ -35,7 +36,7 @@ async function verifyRecaptcha(token, minScore = 0.5) {
 // @route   POST /api/contact
 // @desc    Send contact form email with reCAPTCHA v3
 // @access  Public
-router.post('/', async (req, res) => {
+router.post('/', contactLimiter, async (req, res) => {
   try {
     const { name, email, subject, message, recaptchaToken } = req.body;
     
