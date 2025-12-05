@@ -455,13 +455,14 @@ async function viewConfiguration(configId) {
           
           <div style="margin-bottom: 24px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <h4 style="margin: 0;">Profiles (${config.profiles.length})</h4>
+              <h4 style="margin: 0;">Profiles (<span id="profileCount">${config.profiles.length}</span>)</h4>
               <button class="btn btn-small btn-primary" onclick="addConfigProfile()" title="Add Profile">+ Add Profile</button>
             </div>
             ${config.profiles.length > 0 ? `
-              <div style="max-height: 300px; overflow-y: auto;">
+              <input type="text" id="searchProfiles" class="filter-input" placeholder="🔍 Search profiles by title, host, or username..." style="margin-bottom: 12px; width: 100%;">
+              <div id="profilesList" style="max-height: 300px; overflow-y: auto;">
                 ${config.profiles.map((p, index) => `
-                  <div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: start;">
+                  <div class="profile-item" data-title="${escapeHtml(p.title).toLowerCase()}" data-host="${escapeHtml(p.host).toLowerCase()}" data-username="${escapeHtml(p.username).toLowerCase()}" style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: start;">
                     <div style="flex: 1;">
                       <strong>${escapeHtml(p.title)}</strong><br>
                       <span style="font-size: 12px; color: var(--text-secondary);">
@@ -480,13 +481,14 @@ async function viewConfiguration(configId) {
           
           <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <h4 style="margin: 0;">Commands (${config.commands.length})</h4>
+              <h4 style="margin: 0;">Commands (<span id="commandCount">${config.commands.length}</span>)</h4>
               <button class="btn btn-small btn-primary" onclick="addConfigCommand()" title="Add Command">+ Add Command</button>
             </div>
             ${config.commands.length > 0 ? `
-              <div style="max-height: 300px; overflow-y: auto;">
+              <input type="text" id="searchCommands" class="filter-input" placeholder="🔍 Search commands by title, command text, or profile..." style="margin-bottom: 12px; width: 100%;">
+              <div id="commandsList" style="max-height: 300px; overflow-y: auto;">
                 ${config.commands.map((c, index) => `
-                  <div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: start;">
+                  <div class="command-item" data-title="${escapeHtml(c.title).toLowerCase()}" data-command="${escapeHtml(c.command).toLowerCase()}" data-profile="${escapeHtml(c.profile).toLowerCase()}" style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: start;">
                     <div style="flex: 1;">
                       <strong>${escapeHtml(c.title)}</strong><br>
                       <code style="font-size: 12px; color: var(--text-secondary); word-break: break-all;">${escapeHtml(c.command)}</code><br>
@@ -506,10 +508,83 @@ async function viewConfiguration(configId) {
         
         document.getElementById('configDetails').innerHTML = detailsHtml;
         openModal('viewConfigModal');
+        
+        // Setup search functionality after modal is opened
+        setupConfigDetailSearch();
       }
     }
   } catch (error) {
     showToast('Failed to load configuration details', 'error');
+  }
+}
+
+// Setup search functionality for configuration details modal
+function setupConfigDetailSearch() {
+  const profileSearch = document.getElementById('searchProfiles');
+  const commandSearch = document.getElementById('searchCommands');
+  
+  // Profile search
+  if (profileSearch) {
+    profileSearch.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const profileItems = document.querySelectorAll('.profile-item');
+      let visibleCount = 0;
+      
+      profileItems.forEach(item => {
+        const title = item.dataset.title || '';
+        const host = item.dataset.host || '';
+        const username = item.dataset.username || '';
+        
+        const matches = title.includes(searchTerm) || 
+                       host.includes(searchTerm) || 
+                       username.includes(searchTerm);
+        
+        if (matches || searchTerm === '') {
+          item.style.display = '';
+          visibleCount++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      // Update count
+      const countElement = document.getElementById('profileCount');
+      if (countElement) {
+        countElement.textContent = visibleCount;
+      }
+    });
+  }
+  
+  // Command search
+  if (commandSearch) {
+    commandSearch.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const commandItems = document.querySelectorAll('.command-item');
+      let visibleCount = 0;
+      
+      commandItems.forEach(item => {
+        const title = item.dataset.title || '';
+        const command = item.dataset.command || '';
+        const profile = item.dataset.profile || '';
+        
+        const matches = title.includes(searchTerm) || 
+                       command.includes(searchTerm) || 
+                       profile.includes(searchTerm);
+        
+        if (matches || searchTerm === '') {
+          item.style.display = '';
+          visibleCount++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      // Update count
+      const countElement = document.getElementById('commandCount');
+      if (countElement) {
+        countElement.textContent = visibleCount;
+      }
+    });
   }
 }
 
