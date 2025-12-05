@@ -4,7 +4,7 @@
     "title": "test 2",
     "command": "ping sedat.netlify.app",
     "url": "https://apple.com",
-    "profile": "Profile 2"
+    "profile": "Profile 3"
   },
   {
     "lineNumber": 2,
@@ -32,6 +32,6 @@
     "title": "test 3",
     "command": "ping twitch.com",
     "url": "https://twitch.com",
-    "profile": "Profile 2"
+    "profile": "Profile 3"
   }
 ]

@@ -7,10 +7,10 @@
     "port": 22
   },
   {
-    "title": "Profile 2",
+    "title": "Profile 3",
     "username": "user2",
     "password": "password2",
     "host": "192.168.10.12",
-    "port": 22
+    "port": "22"
   }
 ]

@@ -369,6 +369,78 @@
         </div>
     </div>
 
+    <!-- Edit Profile Modal -->
+    <div class="modal" id="editProfileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit SSH Profile</h3>
+                <button class="modal-close" onclick="closeModal('editProfileModal')">&times;</button>
+            </div>
+            <form id="editProfileForm">
+                <input type="hidden" id="editProfileIndex">
+                <div class="form-group">
+                    <label for="editProfileTitle">Title</label>
+                    <input type="text" id="editProfileTitle" required placeholder="My Server">
+                </div>
+                <div class="form-group">
+                    <label for="editProfileHost">Host</label>
+                    <input type="text" id="editProfileHost" required placeholder="192.168.1.100">
+                </div>
+                <div class="form-group">
+                    <label for="editProfileUsername">Username</label>
+                    <input type="text" id="editProfileUsername" required placeholder="root">
+                </div>
+                <div class="form-group">
+                    <label for="editProfilePassword">Password</label>
+                    <input type="password" id="editProfilePassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="editProfilePort">Port</label>
+                    <input type="number" id="editProfilePort" value="22">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editProfileModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Command Modal -->
+    <div class="modal" id="editCommandModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Command</h3>
+                <button class="modal-close" onclick="closeModal('editCommandModal')">&times;</button>
+            </div>
+            <form id="editCommandForm">
+                <input type="hidden" id="editCommandIndex">
+                <div class="form-group">
+                    <label for="editCommandTitle">Title</label>
+                    <input type="text" id="editCommandTitle" required placeholder="Restart Server">
+                </div>
+                <div class="form-group">
+                    <label for="editCommandText">Command</label>
+                    <textarea id="editCommandText" required placeholder="sudo systemctl restart nginx" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editCommandProfile">Profile</label>
+                    <select id="editCommandProfile" required>
+                        <option value="">Select a profile</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editCommandUrl">URL (Optional)</label>
+                    <input type="url" id="editCommandUrl" placeholder="https://example.com">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editCommandModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 

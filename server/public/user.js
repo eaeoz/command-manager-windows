@@ -111,6 +111,18 @@ function setupEventListeners() {
   if (changePasswordForm) {
     changePasswordForm.addEventListener('submit', handleChangePassword);
   }
+  
+  // Edit profile form
+  const editProfileForm = document.getElementById('editProfileForm');
+  if (editProfileForm) {
+    editProfileForm.addEventListener('submit', handleEditProfile);
+  }
+  
+  // Edit command form
+  const editCommandForm = document.getElementById('editCommandForm');
+  if (editCommandForm) {
+    editCommandForm.addEventListener('submit', handleEditCommand);
+  }
 }
 
 // Authentication
@@ -350,6 +362,7 @@ function renderProfiles(profiles) {
         </div>
       </div>
       <div class="profile-card-actions">
+        <button class="btn btn-small btn-secondary" onclick="editProfile(${index})">Edit</button>
         <button class="btn btn-small btn-danger" onclick="deleteProfile(${index})">Delete</button>
       </div>
     </div>
@@ -447,6 +460,7 @@ function renderCommands(commands) {
         ${cmd.url ? `<a href="${escapeHtml(cmd.url)}" target="_blank" style="color: var(--primary);">Open URL</a>` : ''}
       </div>
       <div class="command-card-actions">
+        <button class="btn btn-small btn-secondary" onclick="editCommand(${index})">Edit</button>
         <button class="btn btn-small btn-danger" onclick="deleteCommand(${index})">Delete</button>
       </div>
     </div>
@@ -725,6 +739,98 @@ async function deleteAccount() {
   }
 }
 
+// Edit Profile Function
+function editProfile(index) {
+  const profile = userConfig.profiles[index];
+  
+  document.getElementById('editProfileIndex').value = index;
+  document.getElementById('editProfileTitle').value = profile.title;
+  document.getElementById('editProfileHost').value = profile.host;
+  document.getElementById('editProfileUsername').value = profile.username;
+  document.getElementById('editProfilePassword').value = profile.password;
+  document.getElementById('editProfilePort').value = profile.port;
+  
+  openModal('editProfileModal');
+}
+
+async function handleEditProfile(e) {
+  e.preventDefault();
+  
+  const index = parseInt(document.getElementById('editProfileIndex').value);
+  
+  userConfig.profiles[index] = {
+    title: document.getElementById('editProfileTitle').value,
+    host: document.getElementById('editProfileHost').value,
+    username: document.getElementById('editProfileUsername').value,
+    password: document.getElementById('editProfilePassword').value,
+    port: parseInt(document.getElementById('editProfilePort').value)
+  };
+  
+  try {
+    await fetchAPI('/config/profiles', {
+      method: 'PUT',
+      body: JSON.stringify({ profiles: userConfig.profiles })
+    });
+    
+    showToast('Profile updated successfully', 'success');
+    closeModal('editProfileModal');
+    loadProfilesData();
+  } catch (error) {
+    showToast('Failed to update profile', 'error');
+  }
+}
+
+// Edit Command Function
+function editCommand(index) {
+  const command = userConfig.commands[index];
+  
+  document.getElementById('editCommandIndex').value = index;
+  document.getElementById('editCommandTitle').value = command.title;
+  document.getElementById('editCommandText').value = command.command;
+  document.getElementById('editCommandProfile').value = command.profile;
+  document.getElementById('editCommandUrl').value = command.url || '';
+  
+  // Update profile select in edit modal
+  updateEditCommandProfileSelect(userConfig.profiles);
+  
+  openModal('editCommandModal');
+}
+
+function updateEditCommandProfileSelect(profiles) {
+  const select = document.getElementById('editCommandProfile');
+  if (select) {
+    select.innerHTML = '<option value="">Select a profile</option>' +
+      profiles.map(p => `<option value="${escapeHtml(p.title)}">${escapeHtml(p.title)}</option>`).join('');
+  }
+}
+
+async function handleEditCommand(e) {
+  e.preventDefault();
+  
+  const index = parseInt(document.getElementById('editCommandIndex').value);
+  
+  userConfig.commands[index] = {
+    lineNumber: userConfig.commands[index].lineNumber,
+    title: document.getElementById('editCommandTitle').value,
+    command: document.getElementById('editCommandText').value,
+    profile: document.getElementById('editCommandProfile').value,
+    url: document.getElementById('editCommandUrl').value || ''
+  };
+  
+  try {
+    await fetchAPI('/config/commands', {
+      method: 'PUT',
+      body: JSON.stringify({ commands: userConfig.commands })
+    });
+    
+    showToast('Command updated successfully', 'success');
+    closeModal('editCommandModal');
+    loadCommandsData();
+  } catch (error) {
+    showToast('Failed to update command', 'error');
+  }
+}
+
 // Utility Functions
 function escapeHtml(text) {
   const div = document.createElement('div');
@@ -738,6 +844,8 @@ window.showLogin = showLogin;
 window.switchPage = switchPage;
 window.showAddProfileModal = showAddProfileModal;
 window.showAddCommandModal = showAddCommandModal;
+window.editProfile = editProfile;
+window.editCommand = editCommand;
 window.deleteProfile = deleteProfile;
 window.deleteCommand = deleteCommand;
 window.closeModal = closeModal;
