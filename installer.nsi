@@ -1,5 +1,5 @@
 !define APP_NAME "CommandManager"
-!define APP_VERSION "1.0.0"
+!define APP_VERSION "1.0.1"
 !define OUTFILE "dist\${APP_NAME}_${APP_VERSION}_Setup.exe"
 
 OutFile "${OUTFILE}"
@@ -15,7 +15,7 @@ Name "${APP_NAME} ${APP_VERSION}"
 !insertmacro MUI_PAGE_INSTFILES
 
 ; Custom finish page
-!define MUI_FINISHPAGE_RUN "$INSTDIR\command-manager.exe"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\Command Manager.exe"
 !define MUI_FINISHPAGE_RUN_TEXT "Launch ${APP_NAME}"
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\resources\app\README.md"
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Open README file"
@@ -26,23 +26,23 @@ Name "${APP_NAME} ${APP_VERSION}"
 Section "MainSection" SEC01
     SetOutPath "$INSTDIR"
 
-    File /r "dist\command-manager-win32-x64\*.*"
+    File /r "dist\win-unpacked\*.*"
     File "LICENSE"
 
     WriteUninstaller "$INSTDIR\uninstall.exe"
 
     ; Create desktop shortcut without asking
-    CreateShortcut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\command-manager.exe" "" "$INSTDIR\resources\app\favicon.ico"
+    CreateShortcut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\Command Manager.exe" "" "$INSTDIR\resources\app\favicon.ico"
     
     ; Create Start menu shortcut
-    CreateShortcut "$SMPROGRAMS\${APP_NAME}.lnk" "$INSTDIR\command-manager.exe" "" "$INSTDIR\resources\app\favicon.ico"
+    CreateShortcut "$SMPROGRAMS\${APP_NAME}.lnk" "$INSTDIR\Command Manager.exe" "" "$INSTDIR\resources\app\favicon.ico"
 
     ; Register application for Add/Remove Programs
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayName" "${APP_NAME}"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "InstallLocation" "$\"$INSTDIR$\""
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayIcon" "$\"$INSTDIR\command-manager.exe$\""
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayIcon" "$\"$INSTDIR\Command Manager.exe$\""
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "Publisher" "Sedat ERGOZ"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayVersion" "${APP_VERSION}"
     WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "NoModify" 1
