@@ -910,7 +910,7 @@ border-top: none;
         
           <li onclick="openExternalURL('https://github.com/eaeoz/command-manager-docker')"><i class="fa-brands fa-github"></i> Github</li>
           <li onclick="openExternalURL('https://hub.docker.com/r/eaeoz/command-manager-docker')"><i class="fa-brands fa-docker"></i> DockerHub</li>
-          <li onclick="openExternalURL('mailto:sedatergoz@gmail.com')"><i class="fas fa-envelope"></i> Contact</li>
+          <li onclick="openExternalURL('https://sedat.netlify.app/contact')"><i class="fas fa-envelope"></i> Contact</li>
         </ul>
       </navx>
       

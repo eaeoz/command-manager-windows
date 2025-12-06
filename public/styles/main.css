@@ -405,10 +405,12 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    gap: 0.75rem;
 }
 
 .command-title-wrapper {
     flex: 1;
+    min-width: 0;
 }
 
 .command-title {
@@ -416,7 +418,10 @@ body {
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 0.25rem;
-    word-break: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .command-profile {
