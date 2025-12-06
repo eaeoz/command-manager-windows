@@ -393,6 +393,18 @@ function handleLogout() {
     devicesList.innerHTML = '';
   }
   
+  // Clear login form fields
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    loginForm.reset();
+  }
+  
+  // Clear any error messages
+  const loginError = document.getElementById('loginError');
+  if (loginError) {
+    loginError.classList.remove('show');
+  }
+  
   showAuth();
 }
 
