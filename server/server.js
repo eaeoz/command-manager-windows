@@ -13,6 +13,10 @@ const { checkMaintenanceMode } = require('./middleware/maintenance');
 
 const app = express();
 
+// Trust proxy - Required when behind a reverse proxy (Zeabur, Heroku, nginx, etc.)
+// This allows Express to read X-Forwarded-* headers for correct client IP detection
+app.set('trust proxy', 1);
+
 // Database connection
 const mongoUri = `${process.env.MONGODB_URI}${process.env.DATABASE_NAME}`;
 mongoose.connect(mongoUri, {
