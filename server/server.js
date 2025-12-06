@@ -17,13 +17,50 @@ const app = express();
 // This allows Express to read X-Forwarded-* headers for correct client IP detection
 app.set('trust proxy', 1);
 
-// Database connection
+// Database connection with retry logic
 const mongoUri = `${process.env.MONGODB_URI}${process.env.DATABASE_NAME}`;
-mongoose.connect(mongoUri)
-.then(() => console.log('✅ MongoDB connected successfully'))
-.catch(err => {
-  console.error('❌ MongoDB connection error:', err);
-  process.exit(1);
+
+let isMongoConnected = false;
+
+async function connectToMongoDB(retryCount = 0) {
+  const maxRetries = 5;
+  const retryDelay = 5000; // 5 seconds
+
+  try {
+    await mongoose.connect(mongoUri);
+    console.log('✅ MongoDB connected successfully');
+    isMongoConnected = true;
+  } catch (err) {
+    isMongoConnected = false;
+    console.error('❌ MongoDB connection error:', err.message);
+    
+    if (retryCount < maxRetries) {
+      console.log(`🔄 Retrying MongoDB connection in ${retryDelay/1000} seconds... (Attempt ${retryCount + 1}/${maxRetries})`);
+      setTimeout(() => connectToMongoDB(retryCount + 1), retryDelay);
+    } else {
+      console.error('❌ MongoDB connection failed after maximum retries.');
+      console.error('⚠️  Server will continue running but database operations will fail.');
+      console.error('💡 Please check:');
+      console.error('   1. MongoDB Atlas IP whitelist includes your current IP');
+      console.error('   2. MongoDB URI is correct in environment variables');
+      console.error('   3. MongoDB cluster is running and accessible');
+    }
+  }
+}
+
+// Start initial connection attempt
+connectToMongoDB();
+
+// MongoDB connection event handlers
+mongoose.connection.on('disconnected', () => {
+  console.warn('⚠️  MongoDB disconnected. Attempting to reconnect...');
+  isMongoConnected = false;
+  connectToMongoDB();
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ MongoDB connection error:', err.message);
+  isMongoConnected = false;
 });
 
 // Security middleware - Enhanced Configuration

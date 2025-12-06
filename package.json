@@ -61,6 +61,7 @@
       "app.js",
       "package.json",
       "favicon.ico",
+      ".env",
       "config/**/*",
       "data/**/*",
       "public/**/*",
