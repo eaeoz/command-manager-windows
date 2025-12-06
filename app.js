@@ -1765,6 +1765,7 @@ const createWindow = async () => {
         height: savedBounds.height,
         show: true,          // Show immediately
         backgroundColor: '#1a1a2e', // Solid background
+        autoHideMenuBar: true, // Hide menu bar (File, Edit, View, etc.)
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
@@ -1772,6 +1773,9 @@ const createWindow = async () => {
         icon: path.join(__dirname, 'favicon.ico'), // Add icon
         title: 'Command Manager'
     });
+
+    // Remove/hide the menu completely
+    mainWindow.setMenu(null);
 
     // Load the URL
     mainWindow.loadURL(`http://localhost:${process.env.PORT || 3000}`);
