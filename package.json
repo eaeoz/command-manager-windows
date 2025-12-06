@@ -8,7 +8,11 @@
     "start": "electron .",
     "build": "electron-builder",
     "build-win": "electron-builder --win portable",
+    "build-macos": "electron-builder --mac zip",
+    "build-linux": "electron-builder --linux AppImage",
+    "build-win-mac": "electron-builder --win portable --mac zip",
     "build-installer": "electron-builder --win nsis",
+    "build-all-portable": "electron-builder --win portable --mac zip --linux AppImage",
     "build-all": "electron-builder --win --mac --linux",
     "pack": "electron-packager . CommandManager --platform=win32 --arch=x64 --out=dist --overwrite --prune=true --icon=favicon.ico"
   },
@@ -89,14 +93,44 @@
       "createStartMenuShortcut": true
     },
     "mac": {
-      "target": "dmg",
-      "icon": "favicon.ico",
-      "category": "public.app-category.utilities"
+      "target": [
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "app-icon.png",
+      "category": "public.app-category.utilities",
+      "darkModeSupport": true
     },
     "linux": {
-      "target": "AppImage",
-      "icon": "favicon.ico",
-      "category": "Utility"
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "tar.gz",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "app-icon.png",
+      "category": "Utility",
+      "executableName": "command-manager"
     },
     "forceCodeSigning": false,
     "compression": "normal",
