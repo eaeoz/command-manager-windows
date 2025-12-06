@@ -1764,6 +1764,7 @@ const createWindow = async () => {
         width: savedBounds.width,
         height: savedBounds.height,
         show: true,          // Show immediately
+        frame: false,        // Remove Windows title bar
         backgroundColor: '#1a1a2e', // Solid background
         autoHideMenuBar: true, // Hide menu bar (File, Edit, View, etc.)
         webPreferences: {

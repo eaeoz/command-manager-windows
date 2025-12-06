@@ -85,7 +85,31 @@ body {
 .header-right {
     display: flex;
     gap: 0.5rem;
+    align-items: center;
     -webkit-app-region: no-drag;
+}
+
+/* Window Controls */
+.window-controls {
+    display: flex;
+    gap: 0.25rem;
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+    border-left: 1px solid var(--border-color);
+}
+
+.window-controls .btn-icon {
+    -webkit-app-region: no-drag;
+}
+
+.btn-minimize:hover {
+    background: var(--bg-tertiary);
+    color: var(--warning-color);
+}
+
+.btn-maximize:hover {
+    background: var(--bg-tertiary);
+    color: var(--info-color);
 }
 
 /* Main Content */
