@@ -19,10 +19,7 @@ app.set('trust proxy', 1);
 
 // Database connection
 const mongoUri = `${process.env.MONGODB_URI}${process.env.DATABASE_NAME}`;
-mongoose.connect(mongoUri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(mongoUri)
 .then(() => console.log('✅ MongoDB connected successfully'))
 .catch(err => {
   console.error('❌ MongoDB connection error:', err);
