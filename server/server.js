@@ -65,9 +65,6 @@ mongoose.connection.on('error', (err) => {
 
 // Security middleware - Enhanced Configuration
 app.use(helmet({
-  // X-XSS-Protection: 1; mode=block
-  xssFilter: true,
-  
   // X-Frame-Options: DENY (prevent clickjacking)
   frameguard: { action: 'deny' },
   
@@ -112,6 +109,13 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "same-site" },
   crossOriginOpenerPolicy: { policy: "same-origin" },
 }));
+
+// Explicitly set X-XSS-Protection header (helmet v7 removed xssFilter option)
+// Setting to "1; mode=block" to enable XSS filtering
+app.use((req, res, next) => {
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
 
 app.use(mongoSanitize());
 
