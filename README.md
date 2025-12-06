@@ -1,19 +1,15 @@
 # 🚀 Command Manager
 
 <p align="center">
-  <img src="sample.gif" alt="Command Manager Demo" width="700">
-</p>
-
-<p align="center">
   <strong>A powerful desktop and cloud-based SSH command management system</strong><br>
   Manage your SSH profiles and commands from anywhere - desktop app or web dashboard
 </p>
 
 <p align="center">
-  <a href="https://github.com/eaeoz/command-manager-windows/releases/download/v1.0.1/CommandManager_1.0.1_Setup.exe">
+  <a href="https://github.com/eaeoz/command-manager-windows/releases/download/1.0.1/CommandManager_1.0.1_Setup.exe">
     <img src="https://img.shields.io/badge/Download-Windows%20Setup-blue?style=for-the-badge&logo=windows" alt="Download Windows Setup">
   </a>
-  <a href="https://github.com/eaeoz/command-manager-windows/releases/download/v1.0.1/Command-Manager-1.0.1-Portable.exe">
+  <a href="https://github.com/eaeoz/command-manager-windows/releases/download/1.0.1/Command-Manager-1.0.1-Portable.exe">
     <img src="https://img.shields.io/badge/Download-Portable%20Version-orange?style=for-the-badge&logo=windows" alt="Download Portable">
   </a>
   <a href="http://comm.zeabur.app/">
@@ -112,8 +108,8 @@
 #### 📥 Installation
 
 1. **Download your preferred version**:
-   - [Windows Setup v1.0.1](https://github.com/eaeoz/command-manager-windows/releases/download/v1.0.1/CommandManager_1.0.1_Setup.exe) - Recommended, includes installer
-   - [Portable v1.0.1](https://github.com/eaeoz/command-manager-windows/releases/download/v1.0.1/Command-Manager-1.0.1-Portable.exe) - No installation required
+   - [Windows Setup v1.0.1](https://github.com/eaeoz/command-manager-windows/releases/download/1.0.1/CommandManager_1.0.1_Setup.exe) - Recommended, includes installer
+   - [Portable v1.0.1](https://github.com/eaeoz/command-manager-windows/releases/download/1.0.1/Command-Manager-1.0.1-Portable.exe) - No installation required
 
 2. **Installation (Setup version)**:
    - Double-click `CommandManager_1.0.1_Setup.exe`
