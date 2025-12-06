@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const { exec } = require('child_process');
 
 const { apiLimiter } = require('./middleware/rateLimiter');
 const { checkMaintenanceMode } = require('./middleware/maintenance');
@@ -173,10 +174,42 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+// Function to get public IP address
+async function getPublicIP() {
+  return new Promise((resolve, reject) => {
+    exec('npx checkmyip', (error, stdout, stderr) => {
+      if (error) {
+        console.error('⚠️ Could not retrieve public IP:', error.message);
+        resolve(null);
+        return;
+      }
+      if (stderr) {
+        console.error('⚠️ checkmyip stderr:', stderr);
+      }
+      // Parse the output to get just the IP address
+      const output = stdout.trim();
+      const ipMatch = output.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/);
+      resolve(ipMatch ? ipMatch[0] : output);
+    });
+  });
+}
+
+app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Admin panel: http://localhost:${PORT}/admin`);
   console.log(`🔐 Environment: ${process.env.NODE_ENV || 'development'}`);
+  
+  // Get and display public IP for MongoDB whitelist
+  console.log('\n🌐 Fetching public IP address...');
+  const publicIP = await getPublicIP();
+  if (publicIP) {
+    console.log('┌─────────────────────────────────────────────────┐');
+    console.log('│  📍 PUBLIC IP ADDRESS (for MongoDB whitelist)  │');
+    console.log('├─────────────────────────────────────────────────┤');
+    console.log(`│  ${publicIP.padEnd(45)} │`);
+    console.log('└─────────────────────────────────────────────────┘');
+    console.log('💡 Add this IP to your MongoDB Atlas Network Access\n');
+  }
 });
 
 // Handle unhandled promise rejections
