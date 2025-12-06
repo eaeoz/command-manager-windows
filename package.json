@@ -1,11 +1,16 @@
 {
   "name": "command-manager",
   "version": "1.0.0",
+  "description": "Command Manager Desktop Application",
   "main": "app.js",
   "bin": "app.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-packager . command-manager --platform=win32 --arch=x64 --out=dist --overwrite  --prune=true --icon=favicon.ico"
+    "build": "electron-builder",
+    "build-win": "electron-builder --win portable",
+    "build-installer": "electron-builder --win nsis",
+    "build-all": "electron-builder --win --mac --linux",
+    "pack": "electron-packager . CommandManager --platform=win32 --arch=x64 --out=dist --overwrite --prune=true --icon=favicon.ico"
   },
   "pkg": {
     "targets": [
@@ -33,8 +38,68 @@
     "ssh2": "^1.16.0"
   },
   "devDependencies": {
+    "canvas": "^3.2.0",
     "electron": "^32.1.2",
-    "electron-packager": "^17.1.2"
+    "electron-builder": "^24.9.1",
+    "electron-packager": "^17.1.2",
+    "png-to-ico": "^3.0.1",
+    "to-ico": "^1.1.5"
   },
-  "description": ""
+  "build": {
+    "appId": "com.commandmanager.app",
+    "productName": "Command Manager",
+    "asar": false,
+    "directories": {
+      "output": "dist",
+      "buildResources": "."
+    },
+    "files": [
+      "app.js",
+      "package.json",
+      "favicon.ico",
+      "config/**/*",
+      "data/**/*",
+      "public/**/*",
+      "server/**/*",
+      "views/**/*",
+      "temp/.gitkeep",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "favicon.ico",
+      "sign": null,
+      "signDlls": false
+    },
+    "portable": {
+      "artifactName": "Command-Manager-Portable.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Command-Manager-Setup.exe",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "favicon.ico",
+      "category": "public.app-category.utilities"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "favicon.ico",
+      "category": "Utility"
+    },
+    "forceCodeSigning": false,
+    "compression": "normal",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+  }
 }

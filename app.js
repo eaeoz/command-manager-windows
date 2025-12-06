@@ -27,7 +27,29 @@ require('dotenv').config({ path: envPath });
 
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 
+// Request single instance lock
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+    // If we didn't get the lock, quit immediately
+    console.log('Another instance is already running. Quitting...');
+    app.quit();
+} else {
+    // We got the lock, set up second-instance handler
+    app.on('second-instance', (event, commandLine, workingDirectory) => {
+        // Someone tried to run a second instance, focus our window instead
+        const windows = BrowserWindow.getAllWindows();
+        if (windows.length > 0) {
+            const mainWindow = windows[0];
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.focus();
+            mainWindow.show();
+        }
+    });
+}
+
 let store; // Declare store variable
+let mainWindow = null; // Keep reference to main window globally
 
 async function loadStore() {
     const { default: Store } = await import('electron-store');
@@ -1704,13 +1726,28 @@ expressApp.post('/backup/restore', upload.single('backup'), (req, res) => {
 
 
 
-// Start the Express server
-expressApp.listen(PORT, () => {
+// Start the Express server and create window after it's ready
+let serverReady = false;
+const server = expressApp.listen(PORT, () => {
     console.log(`Express server is running on http://localhost:${PORT}`);
+    serverReady = true;
 });
 
 
 const createWindow = async () => {
+    // Wait for server to be ready
+    let attempts = 0;
+    while (!serverReady && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+    }
+    
+    if (!serverReady) {
+        console.error('Server failed to start in time');
+        return;
+    }
+    
+    console.log('Server is ready, creating window...');
     await loadStore(); // Ensure the store is loaded before creating the window
 
     // Get saved bounds with default values
@@ -1721,35 +1758,74 @@ const createWindow = async () => {
         height: 1080 
     });
 
-    const win = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         x: savedBounds.x,
         y: savedBounds.y,
         width: savedBounds.width,
         height: savedBounds.height,
-        transparent: true,   // Makes the window background transparent
-        frame: false,        // Removes the default window frame (title bar, close buttons)
-        hasShadow: false,    // Prevents the window from having a shadow (better for transparency)
+        show: true,          // Show immediately
+        backgroundColor: '#1a1a2e', // Solid background
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
+        },
+        icon: path.join(__dirname, 'favicon.ico'), // Add icon
+        title: 'Command Manager'
+    });
+
+    // Load the URL
+    mainWindow.loadURL(`http://localhost:${process.env.PORT || 3000}`);
+
+    // Show window when ready to prevent visual flash
+    mainWindow.once('ready-to-show', () => {
+        console.log('Window ready to show');
+        mainWindow.show();
+        mainWindow.focus();
+        
+        // Force show if still not visible after 1 second
+        setTimeout(() => {
+            if (!mainWindow.isVisible()) {
+                console.log('Force showing window');
+                mainWindow.showInactive();
+                mainWindow.show();
+                mainWindow.focus();
+                mainWindow.moveTop();
+            }
+        }, 1000);
+    });
+
+    // Additional safeguard - show window after page loads
+    mainWindow.webContents.on('did-finish-load', () => {
+        console.log('Page finished loading');
+        if (!mainWindow.isVisible()) {
+            console.log('Showing window after page load');
+            mainWindow.show();
+            mainWindow.focus();
         }
     });
 
-    win.loadURL(`http://localhost:${process.env.PORT || 3000}`);
+    // Log errors
+    mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+        console.error('Failed to load:', errorCode, errorDescription);
+        logError(`Window failed to load: ${errorDescription}`);
+    });
 
     // Save window size and position when moved or resized
     const saveBounds = () => {
-        if (!win.isMinimized() && !win.isMaximized()) {
-            store.set('windowBounds', win.getBounds());
+        if (!mainWindow.isMinimized() && !mainWindow.isMaximized()) {
+            store.set('windowBounds', mainWindow.getBounds());
         }
     };
 
     // Save bounds on various events
-    win.on('resize', saveBounds);
-    win.on('move', saveBounds);
+    mainWindow.on('resize', saveBounds);
+    mainWindow.on('move', saveBounds);
     
     // Save one final time when closing
-    win.on('close', saveBounds);
+    mainWindow.on('close', saveBounds);
+
+    // Keep reference to window
+    return mainWindow;
 };
 
 
