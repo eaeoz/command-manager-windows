@@ -1,0 +1,65 @@
+!define APP_NAME "CommandManager"
+!define APP_VERSION "1.0.0"
+!define OUTFILE "dist\${APP_NAME}_${APP_VERSION}_Setup.exe"
+
+OutFile "${OUTFILE}"
+InstallDir "$LOCALAPPDATA\${APP_NAME}"
+
+!include "MUI2.nsh"
+
+Name "${APP_NAME} ${APP_VERSION}"
+
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_LICENSE "LICENSE"
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+
+; Custom finish page
+!define MUI_FINISHPAGE_RUN "$INSTDIR\command-manager.exe"
+!define MUI_FINISHPAGE_RUN_TEXT "Launch ${APP_NAME}"
+!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\resources\app\README.md"
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "Open README file"
+!insertmacro MUI_PAGE_FINISH
+
+!insertmacro MUI_LANGUAGE "English"
+
+Section "MainSection" SEC01
+    SetOutPath "$INSTDIR"
+
+    File /r "dist\command-manager-win32-x64\*.*"
+    File "LICENSE"
+
+    WriteUninstaller "$INSTDIR\uninstall.exe"
+
+    ; Create desktop shortcut without asking
+    CreateShortcut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\command-manager.exe" "" "$INSTDIR\resources\app\favicon.ico"
+    
+    ; Create Start menu shortcut
+    CreateShortcut "$SMPROGRAMS\${APP_NAME}.lnk" "$INSTDIR\command-manager.exe" "" "$INSTDIR\resources\app\favicon.ico"
+
+    ; Register application for Add/Remove Programs
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayName" "${APP_NAME}"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "InstallLocation" "$\"$INSTDIR$\""
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayIcon" "$\"$INSTDIR\command-manager.exe$\""
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "Publisher" "Sedat ERGOZ"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "DisplayVersion" "${APP_VERSION}"
+    WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "NoModify" 1
+    WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" "NoRepair" 1
+SectionEnd
+
+Section "Uninstall"
+    ; Remove files and folders
+    RMDir /r "$INSTDIR"
+
+    ; Remove desktop shortcut
+    Delete "$DESKTOP\${APP_NAME}.lnk"
+
+    ; Remove Start menu shortcut
+    Delete "$SMPROGRAMS\${APP_NAME}.lnk"
+
+    ; Remove registry keys
+    DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
+    DeleteRegKey HKCU "SOFTWARE\${APP_NAME}"
+SectionEnd
