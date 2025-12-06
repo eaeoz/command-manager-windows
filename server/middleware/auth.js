@@ -47,7 +47,7 @@ exports.protect = async (req, res, next) => {
     } catch (err) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid or expired token'
+        message: 'Session expired. Please log in again.'
       });
     }
   } catch (error) {
@@ -153,7 +153,7 @@ exports.auth = async (req, res, next) => {
     } catch (err) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid or expired token'
+        message: 'Session expired. Please log in again.'
       });
     }
   } catch (error) {
