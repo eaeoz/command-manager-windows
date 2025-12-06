@@ -1,13 +1,5 @@
 [
   {
-    "title": "Profile 1",
-    "host": "192.168.10.11",
-    "username": "user1",
-    "password": "password1",
-    "port": 22,
-    "_id": "69326789e87e4225d7ce456a"
-  },
-  {
     "title": "media",
     "username": "root",
     "password": "root",
