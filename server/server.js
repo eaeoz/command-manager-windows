@@ -21,29 +21,56 @@ app.set('trust proxy', 1);
 const mongoUri = `${process.env.MONGODB_URI}${process.env.DATABASE_NAME}`;
 
 let isMongoConnected = false;
+let isReconnecting = false;
+
+// MongoDB connection options for better stability
+const mongooseOptions = {
+  serverSelectionTimeoutMS: 30000, // Give more time for server selection
+  socketTimeoutMS: 0, // Disable socket timeout (keep sockets alive)
+  connectTimeoutMS: 30000, // 30 seconds to establish connection
+  heartbeatFrequencyMS: 10000, // Check connection every 10 seconds
+  maxPoolSize: 10, // Maintain up to 10 socket connections
+  minPoolSize: 2, // Maintain at least 2 socket connections
+  retryWrites: true,
+  retryReads: true,
+  family: 4, // Use IPv4, skip trying IPv6
+};
 
 async function connectToMongoDB(retryCount = 0) {
   const maxRetries = 5;
   const retryDelay = 5000; // 5 seconds
 
+  // Prevent multiple simultaneous reconnection attempts
+  if (isReconnecting && retryCount > 0) {
+    return;
+  }
+
+  isReconnecting = true;
+
   try {
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, mongooseOptions);
     console.log('✅ MongoDB connected successfully');
     isMongoConnected = true;
+    isReconnecting = false;
   } catch (err) {
     isMongoConnected = false;
     console.error('❌ MongoDB connection error:', err.message);
     
     if (retryCount < maxRetries) {
       console.log(`🔄 Retrying MongoDB connection in ${retryDelay/1000} seconds... (Attempt ${retryCount + 1}/${maxRetries})`);
-      setTimeout(() => connectToMongoDB(retryCount + 1), retryDelay);
+      setTimeout(() => {
+        isReconnecting = false;
+        connectToMongoDB(retryCount + 1);
+      }, retryDelay);
     } else {
       console.error('❌ MongoDB connection failed after maximum retries.');
       console.error('⚠️  Server will continue running but database operations will fail.');
       console.error('💡 Please check:');
-      console.error('   1. MongoDB Atlas IP whitelist includes your current IP');
+      console.error('   1. MongoDB Atlas IP whitelist includes your current IP (or use 0.0.0.0/0 for testing)');
       console.error('   2. MongoDB URI is correct in environment variables');
       console.error('   3. MongoDB cluster is running and accessible');
+      console.error('   4. Network/firewall is not blocking MongoDB Atlas connection');
+      isReconnecting = false;
     }
   }
 }
@@ -52,15 +79,28 @@ async function connectToMongoDB(retryCount = 0) {
 connectToMongoDB();
 
 // MongoDB connection event handlers
+mongoose.connection.on('connected', () => {
+  console.log('🔗 MongoDB connection established');
+  isMongoConnected = true;
+});
+
 mongoose.connection.on('disconnected', () => {
-  console.warn('⚠️  MongoDB disconnected. Attempting to reconnect...');
+  console.warn('⚠️  MongoDB disconnected.');
   isMongoConnected = false;
-  connectToMongoDB();
+  
+  // Mongoose will automatically reconnect, so we don't need to manually trigger it
+  // Only log that we're waiting for automatic reconnection
+  console.log('⏳ Waiting for automatic reconnection...');
 });
 
 mongoose.connection.on('error', (err) => {
   console.error('❌ MongoDB connection error:', err.message);
   isMongoConnected = false;
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('✅ MongoDB reconnected successfully');
+  isMongoConnected = true;
 });
 
 // Security middleware - Enhanced Configuration
